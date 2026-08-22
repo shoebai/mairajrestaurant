@@ -1,11 +1,17 @@
 import { Link } from "react-router"
 import { Instagram, Facebook, Phone, Mail } from "lucide-react"
+import logo from "@/assets/mairaj-logo.jpeg"
 
 export default function Footer() {
   return (
     <footer className="bg-foreground text-cream border-t border-cream/10">
       <div className="max-w-6xl mx-auto px-6 py-16 grid md:grid-cols-3 gap-12">
         <div>
+          <img
+            src={logo}
+            alt="Mairaj Restaurant"
+            className="h-14 w-14 rounded-full object-cover mb-4"
+          />
           <h3 className="font-display text-2xl mb-3">Mairaj</h3>
           <p className="font-body text-cream/50 text-sm leading-relaxed">
             Indian cuisine, rooted in tradition, served in the heart of
@@ -42,10 +48,12 @@ export default function Footer() {
           </h4>
           <div className="flex flex-col gap-3 font-body text-sm text-cream/70">
             <a
-              href="tel:+9665XXXXXXXX"
+              href="https://wa.me/966580748325"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 hover:text-gold transition-colors w-fit"
             >
-              <Phone size={14} /> +966 XX XXX XXXX
+              <Phone size={14} /> +966 58 074 8325
             </a>
             <a
               href="mailto:hello@mairaj.example"

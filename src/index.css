@@ -6,26 +6,26 @@
 
 @layer base {
   :root {
-    /* White Cream, English Blue, Brown, Black palette */
-    --background: 40 20% 96%;
-    --foreground: 30 10% 8%;
-    --card: 40 18% 94%;
-    --card-foreground: 30 10% 8%;
-    --popover: 40 18% 94%;
-    --popover-foreground: 30 10% 8%;
-    --primary: 210 45% 35%;
-    --primary-foreground: 40 20% 96%;
-    --secondary: 25 35% 92%;
-    --secondary-foreground: 30 10% 8%;
-    --muted: 35 15% 88%;
+    /* Midnight & Brass palette */
+    --background: 38 24% 95%;
+    --foreground: 222 18% 9%;
+    --card: 38 20% 93%;
+    --card-foreground: 222 18% 9%;
+    --popover: 38 20% 93%;
+    --popover-foreground: 222 18% 9%;
+    --primary: 42 50% 54%;
+    --primary-foreground: 24 20% 10%;
+    --secondary: 30 18% 90%;
+    --secondary-foreground: 222 18% 9%;
+    --muted: 30 12% 86%;
     --muted-foreground: 30 8% 40%;
-    --accent: 25 40% 30%;
-    --accent-foreground: 40 20% 96%;
+    --accent: 20 32% 18%;
+    --accent-foreground: 38 24% 95%;
     --destructive: 0 62.8% 45%;
     --destructive-foreground: 0 0% 98%;
-    --border: 35 15% 82%;
-    --input: 35 15% 82%;
-    --ring: 210 45% 35%;
+    --border: 30 14% 80%;
+    --input: 30 14% 80%;
+    --ring: 42 50% 54%;
     --radius: 0.25rem;
   }
 }
@@ -53,22 +53,22 @@
     letter-spacing: 0.35em;
   }
   .text-gold {
-    color: hsl(210 45% 35%);
+    color: hsl(42 50% 54%);
   }
   .bg-gold {
-    background-color: hsl(210 45% 35%);
+    background-color: hsl(42 50% 54%);
   }
   .border-gold {
-    border-color: hsl(210 45% 35%);
+    border-color: hsl(42 50% 54%);
   }
   .text-brown {
-    color: hsl(25 40% 30%);
+    color: hsl(20 32% 18%);
   }
   .bg-brown {
-    background-color: hsl(25 40% 30%);
+    background-color: hsl(20 32% 18%);
   }
   .border-brown {
-    border-color: hsl(25 40% 30%);
+    border-color: hsl(20 32% 18%);
   }
   .reveal {
     opacity: 0;

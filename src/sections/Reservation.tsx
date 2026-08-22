@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { useReveal } from "@/hooks/useReveal"
 
-// Replace with your real WhatsApp number: country code, digits only, no + or spaces.
-const RESTAURANT_WHATSAPP = "9665XXXXXXXX"
+// Restaurant WhatsApp number: country code + number, digits only, no + or spaces.
+const RESTAURANT_WHATSAPP = "966580748325"
 
 export default function Reservation() {
   const ref = useReveal<HTMLDivElement>()
@@ -12,7 +12,7 @@ export default function Reservation() {
     date: "",
     time: "",
     guests: "2",
-    branch: "Shohada Street",
+    branch: "Mairaj Restaurant — Since 2001",
   })
 
   const update =
@@ -133,8 +133,7 @@ Guests: ${form.guests}`
                 onChange={update("branch")}
                 className="w-full mt-2 bg-transparent border-b border-foreground/20 focus:border-gold outline-none py-2 font-body"
               >
-                <option>Shohada Street</option>
-                <option>Malik Abdulaziz Road</option>
+                <option>Mairaj Restaurant — Since 2001</option>
               </select>
             </div>
           </div>

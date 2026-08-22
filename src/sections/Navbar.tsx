@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link, useLocation } from "react-router"
 import { Menu, X } from "lucide-react"
+import logo from "@/assets/mairaj-logo.jpeg"
 
 const links = [
   { label: "Home", to: "/" },
@@ -32,13 +33,17 @@ export default function Navbar() {
       }`}
     >
       <nav className="max-w-6xl mx-auto px-6 flex items-center justify-between">
-        <Link
-          to="/"
-          className="font-display text-2xl md:text-3xl tracking-wide text-foreground"
-        >
-          Mairaj
-          <span className="block text-[0.6rem] font-body tracking-mega text-gold uppercase mt-0.5">
-            Restaurant &middot; Madinah
+        <Link to="/" className="flex items-center gap-3">
+          <img
+            src={logo}
+            alt="Mairaj Restaurant"
+            className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover shrink-0"
+          />
+          <span className="font-display text-2xl md:text-3xl tracking-wide text-foreground">
+            Mairaj
+            <span className="block text-[0.6rem] font-body tracking-mega text-gold uppercase mt-0.5">
+              Restaurant &middot; Madinah
+            </span>
           </span>
         </Link>
 
