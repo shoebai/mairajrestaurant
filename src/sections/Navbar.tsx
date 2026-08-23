@@ -27,6 +27,11 @@ export default function Navbar() {
     setOpen(false)
   }, [location.pathname])
 
+  // Navbar sits on the dark hero (transparent) until scrolled, then on a cream bar.
+  // Text color has to flip with it or it disappears against one background.
+  const base = scrolled ? "text-foreground" : "text-cream"
+  const baseMuted = scrolled ? "text-foreground/80" : "text-cream/80"
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -42,7 +47,7 @@ export default function Navbar() {
             alt="Mairaj Restaurant"
             className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover shrink-0"
           />
-          <span className="font-display text-2xl md:text-3xl tracking-wide text-foreground">
+          <span className={`font-display text-2xl md:text-3xl tracking-wide transition-colors duration-500 ${base}`}>
             Mairaj
             <span className="block text-[0.6rem] font-body tracking-mega text-gold uppercase mt-0.5">
               {t("brandTagline")}
@@ -55,11 +60,9 @@ export default function Navbar() {
             <Link
               key={link.to}
               to={link.to}
-              className={`relative font-body text-sm tracking-widest uppercase pb-1 ${
-                location.pathname === link.to
-                  ? "text-gold"
-                  : "text-foreground/80 hover:text-gold"
-              } transition-colors`}
+              className={`relative font-body text-sm tracking-widest uppercase pb-1 transition-colors duration-500 ${
+                location.pathname === link.to ? "text-gold" : `${baseMuted} hover:text-gold`
+              }`}
             >
               {link.label}
               {location.pathname === link.to && (
@@ -76,7 +79,7 @@ export default function Navbar() {
           <button
             onClick={toggleLang}
             aria-label="Toggle language"
-            className="flex items-center gap-1.5 text-foreground/70 hover:text-gold transition-colors font-body text-xs tracking-widest uppercase"
+            className={`flex items-center gap-1.5 hover:text-gold transition-colors duration-500 font-body text-xs tracking-widest uppercase ${baseMuted}`}
           >
             <Languages size={16} />
             {lang === "en" ? "عربي" : "EN"}
@@ -87,12 +90,12 @@ export default function Navbar() {
           <button
             onClick={toggleLang}
             aria-label="Toggle language"
-            className="text-foreground/70 hover:text-gold transition-colors font-body text-xs tracking-widest uppercase"
+            className={`hover:text-gold transition-colors duration-500 font-body text-xs tracking-widest uppercase ${baseMuted}`}
           >
             {lang === "en" ? "عربي" : "EN"}
           </button>
           <button
-            className="text-foreground"
+            className={`transition-colors duration-500 ${base}`}
             onClick={() => setOpen((v) => !v)}
             aria-label="Toggle menu"
           >
