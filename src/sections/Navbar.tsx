@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react"
 import { Link, useLocation } from "react-router"
-import { Menu, X } from "lucide-react"
+import { Menu, X, Languages } from "lucide-react"
 import logo from "@/assets/mairaj-logo.jpeg"
-
-const links = [
-  { label: "Home", to: "/" },
-  { label: "Menu", to: "/menu" },
-]
+import { useT, useLanguage } from "@/lib/i18n"
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const location = useLocation()
+  const t = useT()
+  const { lang, toggleLang } = useLanguage()
+
+  const links = [
+    { label: t("navHome"), to: "/" },
+    { label: t("navMenu"), to: "/menu" },
+  ]
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -42,12 +45,12 @@ export default function Navbar() {
           <span className="font-display text-2xl md:text-3xl tracking-wide text-foreground">
             Mairaj
             <span className="block text-[0.6rem] font-body tracking-mega text-gold uppercase mt-0.5">
-              Restaurant &middot; Madinah
+              {t("brandTagline")}
             </span>
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-10">
+        <div className="hidden md:flex items-center gap-8">
           {links.map((link) => (
             <Link
               key={link.to}
@@ -68,17 +71,34 @@ export default function Navbar() {
             href="#reservation"
             className="border border-gold text-gold hover:bg-gold hover:text-cream transition-colors px-5 py-2 text-xs tracking-mega uppercase font-body"
           >
-            Reserve
+            {t("navReserve")}
           </a>
+          <button
+            onClick={toggleLang}
+            aria-label="Toggle language"
+            className="flex items-center gap-1.5 text-foreground/70 hover:text-gold transition-colors font-body text-xs tracking-widest uppercase"
+          >
+            <Languages size={16} />
+            {lang === "en" ? "عربي" : "EN"}
+          </button>
         </div>
 
-        <button
-          className="md:hidden text-foreground"
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-        >
-          {open ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="md:hidden flex items-center gap-4">
+          <button
+            onClick={toggleLang}
+            aria-label="Toggle language"
+            className="text-foreground/70 hover:text-gold transition-colors font-body text-xs tracking-widest uppercase"
+          >
+            {lang === "en" ? "عربي" : "EN"}
+          </button>
+          <button
+            className="text-foreground"
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Toggle menu"
+          >
+            {open ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </nav>
 
       {open && (
@@ -96,7 +116,7 @@ export default function Navbar() {
             href="#reservation"
             className="border border-gold text-gold text-center px-5 py-2 text-xs tracking-mega uppercase font-body"
           >
-            Reserve
+            {t("navReserve")}
           </a>
         </div>
       )}

@@ -1,8 +1,11 @@
 import { Link } from "react-router"
 import { Instagram, Facebook, Phone, Mail } from "lucide-react"
 import logo from "@/assets/mairaj-logo.jpeg"
+import { useT } from "@/lib/i18n"
 
 export default function Footer() {
+  const t = useT()
+
   return (
     <footer className="bg-foreground text-cream border-t border-cream/10">
       <div className="max-w-6xl mx-auto px-6 py-16 grid md:grid-cols-3 gap-12">
@@ -14,37 +17,30 @@ export default function Footer() {
           />
           <h3 className="font-display text-2xl mb-3">Mairaj</h3>
           <p className="font-body text-cream/50 text-sm leading-relaxed">
-            Indian cuisine, rooted in tradition, served in the heart of
-            Madinah.
+            {t("footerTagline")}
           </p>
         </div>
 
         <div>
           <h4 className="font-body text-xs tracking-mega uppercase text-gold mb-4">
-            Explore
+            {t("explore")}
           </h4>
           <div className="flex flex-col gap-3 font-body text-sm text-cream/70">
             <Link to="/" className="hover:text-gold transition-colors w-fit">
-              Home
+              {t("navHome")}
             </Link>
-            <Link
-              to="/menu"
-              className="hover:text-gold transition-colors w-fit"
-            >
-              Menu
+            <Link to="/menu" className="hover:text-gold transition-colors w-fit">
+              {t("navMenu")}
             </Link>
-            <a
-              href="#reservation"
-              className="hover:text-gold transition-colors w-fit"
-            >
-              Reservations
+            <a href="#reservation" className="hover:text-gold transition-colors w-fit">
+              {t("reservations")}
             </a>
           </div>
         </div>
 
         <div>
           <h4 className="font-body text-xs tracking-mega uppercase text-gold mb-4">
-            Contact
+            {t("contact")}
           </h4>
           <div className="flex flex-col gap-3 font-body text-sm text-cream/70">
             <a
@@ -52,6 +48,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 hover:text-gold transition-colors w-fit"
+              dir="ltr"
             >
               <Phone size={14} /> +966 58 074 8325
             </a>
