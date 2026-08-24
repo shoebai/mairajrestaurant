@@ -1,18 +1,42 @@
+import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import { useT } from "@/lib/i18n"
+import hero1 from "@/assets/hero/hero-1.webp"
+import hero2 from "@/assets/hero/hero-2.webp"
+import hero3 from "@/assets/hero/hero-3.webp"
+
+const slides = [hero1, hero2, hero3]
+const SLIDE_DURATION = 5000
 
 export default function Hero() {
   const t = useT()
+  const [active, setActive] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActive((i) => (i + 1) % slides.length)
+    }, SLIDE_DURATION)
+    return () => clearInterval(id)
+  }, [])
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-foreground">
-      <div
-        className="absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 20% 20%, hsl(42 50% 54%) 0, transparent 45%), radial-gradient(circle at 80% 70%, hsl(20 32% 30%) 0, transparent 45%)",
-        }}
-      />
+      {/* Crossfading background photos */}
+      <div className="absolute inset-0">
+        {slides.map((src, i) => (
+          <div
+            key={src}
+            className="absolute inset-0 bg-cover bg-center transition-opacity ease-in-out"
+            style={{
+              backgroundImage: `url(${src})`,
+              opacity: i === active ? 1 : 0,
+              transitionDuration: "1500ms",
+            }}
+          />
+        ))}
+        {/* Dark overlay for text legibility */}
+        <div className="absolute inset-0 bg-black/65" />
+      </div>
 
       <div className="relative z-10 text-center px-6 max-w-3xl mx-auto">
         <p className="font-body text-[0.65rem] tracking-mega uppercase text-gold mb-6">
@@ -48,6 +72,20 @@ export default function Hero() {
           <span className="w-16 border-t border-dotted border-cream/40" />
           <span className="font-display italic text-sm">{t("heroSinceDayOne")}</span>
           <span className="w-16 border-t border-dotted border-cream/40" />
+        </div>
+
+        {/* Slide indicator dots */}
+        <div className="flex items-center justify-center gap-2 mt-8">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setActive(i)}
+              aria-label={`Show slide ${i + 1}`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === active ? "w-6 bg-gold" : "w-1.5 bg-cream/30 hover:bg-cream/50"
+              }`}
+            />
+          ))}
         </div>
       </div>
 
