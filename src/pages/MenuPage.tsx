@@ -7,11 +7,15 @@ import { useT, useLanguage } from "@/lib/i18n"
 import { RESTAURANT_WHATSAPP } from "@/lib/config"
 
 type Order = Record<string, number>
+type OrderType = "pickup" | "delivery"
 
 export default function MenuPage() {
   const [activeVideo, setActiveVideo] = useState<MenuItem | null>(null)
+  const [activeImage, setActiveImage] = useState<MenuItem | null>(null)
   const [order, setOrder] = useState<Order>({})
   const [cartOpen, setCartOpen] = useState(false)
+  const [orderType, setOrderType] = useState<OrderType>("pickup")
+  const [address, setAddress] = useState("")
   const t = useT()
   const { lang } = useLanguage()
 
@@ -40,10 +44,21 @@ export default function MenuPage() {
       const label = lang === "ar" && item?.nameAr ? item.nameAr : name
       return `${qty}x ${label} — ${item?.price ?? ""}`
     })
+
+    const typeLabel =
+      orderType === "pickup"
+        ? lang === "ar" ? "استلام من المطعم" : "Pickup"
+        : lang === "ar" ? "توصيل" : "Delivery"
+
+    const addressLine =
+      orderType === "delivery"
+        ? `\n${lang === "ar" ? "العنوان" : "Address"}: ${address}`
+        : ""
+
     const message =
       lang === "ar"
-        ? `طلب جديد عبر الموقع\n${lines.join("\n")}`
-        : `New Order via Website\n${lines.join("\n")}`
+        ? `طلب جديد عبر الموقع\nنوع الطلب: ${typeLabel}${addressLine}\n\n${lines.join("\n")}`
+        : `New Order via Website\nOrder Type: ${typeLabel}${addressLine}\n\n${lines.join("\n")}`
 
     const url = `https://wa.me/${RESTAURANT_WHATSAPP}?text=${encodeURIComponent(message)}`
     window.open(url, "_blank")
@@ -78,15 +93,36 @@ export default function MenuPage() {
                     const name = lang === "ar" && item.nameAr ? item.nameAr : item.name
                     const desc = lang === "ar" && item.descAr ? item.descAr : item.desc
                     const qty = order[item.name] ?? 0
+                    const hasImage = Boolean(item.image)
 
                     return (
                       <div key={item.name} className="flex items-baseline gap-3">
-                        <div className="flex-1">
+                        {hasImage && (
+                          <button
+                            onClick={() => setActiveImage(item)}
+                            aria-label={t("viewPhoto")}
+                            className="shrink-0 w-14 h-14 rounded overflow-hidden border border-foreground/10 hover:border-gold transition-colors self-center"
+                          >
+                            <img
+                              src={item.image}
+                              alt={name}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        )}
+
+                        <div
+                          className={`flex-1 ${hasImage ? "cursor-pointer" : ""}`}
+                          onClick={() => hasImage && setActiveImage(item)}
+                        >
                           <div className="flex items-center gap-2">
                             <h3 className="font-display text-xl">{name}</h3>
                             {item.video && (
                               <button
-                                onClick={() => setActiveVideo(item)}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setActiveVideo(item)
+                                }}
                                 aria-label={`Watch ${item.name} video`}
                                 className="text-gold hover:text-brown transition-colors"
                               >
@@ -94,9 +130,11 @@ export default function MenuPage() {
                               </button>
                             )}
                           </div>
-                          <p className="font-body text-foreground/60 text-sm mt-1">
-                            {desc}
-                          </p>
+                          {desc && (
+                            <p className="font-body text-foreground/60 text-sm mt-1">
+                              {desc}
+                            </p>
+                          )}
                         </div>
                         <span className="menu-dots" />
                         <span className="font-display text-lg text-gold shrink-0">
@@ -154,7 +192,7 @@ export default function MenuPage() {
           onClick={() => setCartOpen(false)}
         >
           <div
-            className="bg-cream w-full md:max-w-md md:rounded-t-none rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto"
+            className="bg-cream w-full md:max-w-md md:rounded-t-none rounded-t-2xl p-6 max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
@@ -202,6 +240,50 @@ export default function MenuPage() {
                   })}
                 </div>
 
+                {/* Pickup / Delivery selector */}
+                <div className="mb-6">
+                  <label className="font-body text-xs tracking-widest uppercase text-foreground/50 block mb-2">
+                    {t("orderType")}
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setOrderType("pickup")}
+                      className={`py-2.5 text-xs tracking-widest uppercase font-body border transition-colors ${
+                        orderType === "pickup"
+                          ? "bg-gold text-cream border-gold"
+                          : "border-foreground/20 text-foreground/60 hover:border-gold"
+                      }`}
+                    >
+                      {t("pickup")}
+                    </button>
+                    <button
+                      onClick={() => setOrderType("delivery")}
+                      className={`py-2.5 text-xs tracking-widest uppercase font-body border transition-colors ${
+                        orderType === "delivery"
+                          ? "bg-gold text-cream border-gold"
+                          : "border-foreground/20 text-foreground/60 hover:border-gold"
+                      }`}
+                    >
+                      {t("delivery")}
+                    </button>
+                  </div>
+
+                  {orderType === "delivery" && (
+                    <div className="mt-4">
+                      <label className="font-body text-xs tracking-widest uppercase text-foreground/50 block mb-2">
+                        {t("deliveryAddress")}
+                      </label>
+                      <textarea
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        placeholder={t("deliveryAddressPlaceholder")}
+                        rows={2}
+                        className="w-full bg-white/50 border border-foreground/20 focus:border-gold outline-none py-2 px-3 font-body text-sm resize-none"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex gap-3">
                   <button
                     onClick={clearOrder}
@@ -211,13 +293,40 @@ export default function MenuPage() {
                   </button>
                   <button
                     onClick={sendOrder}
-                    className="flex-1 bg-gold text-cream py-3 text-xs tracking-mega uppercase font-body hover:bg-gold/90 transition-colors"
+                    disabled={orderType === "delivery" && !address.trim()}
+                    className="flex-1 bg-gold text-cream py-3 text-xs tracking-mega uppercase font-body hover:bg-gold/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {t("orderViaWhatsApp")}
                   </button>
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Image modal */}
+      {activeImage && (
+        <div
+          className="fixed inset-0 z-[110] bg-black/80 flex items-center justify-center p-6"
+          onClick={() => setActiveImage(null)}
+        >
+          <div className="relative max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setActiveImage(null)}
+              aria-label="Close image"
+              className="absolute -top-10 right-0 text-cream hover:text-gold"
+            >
+              <X size={24} />
+            </button>
+            <img
+              src={activeImage.image}
+              alt={activeImage.name}
+              className="w-full rounded"
+            />
+            <p className="font-display italic text-cream text-center mt-4">
+              {lang === "ar" && activeImage.nameAr ? activeImage.nameAr : activeImage.name}
+            </p>
           </div>
         </div>
       )}

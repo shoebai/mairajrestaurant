@@ -42,6 +42,10 @@ const dict: Dict = {
 
   galleryEyebrow: { en: "Inside Mairaj", ar: "داخل مائرج" },
   galleryTitle: { en: "A glimpse of the kitchen", ar: "لمحة من المطبخ" },
+  galleryIntro: {
+    en: "A closer look at the kitchen, the fire, and the room where it all comes together.",
+    ar: "نظرة أقرب على المطبخ، النار، والمكان الذي يجتمع فيه كل شيء.",
+  },
 
   findUs: { en: "Find Us", ar: "موقعنا" },
   visitMairaj: { en: "Visit Mairaj", ar: "زوروا مائرج" },
@@ -72,6 +76,12 @@ const dict: Dict = {
   emptyOrder: { en: "No items added yet", ar: "لم تتم إضافة أي عناصر بعد" },
   items: { en: "items", ar: "عناصر" },
   clear: { en: "Clear", ar: "مسح" },
+  orderType: { en: "Order Type", ar: "نوع الطلب" },
+  pickup: { en: "Pickup", ar: "استلام من المطعم" },
+  delivery: { en: "Delivery", ar: "توصيل" },
+  deliveryAddress: { en: "Delivery Address", ar: "عنوان التوصيل" },
+  deliveryAddressPlaceholder: { en: "Building, street, area...", ar: "المبنى، الشارع، الحي..." },
+  viewPhoto: { en: "View photo", ar: "عرض الصورة" },
 
   footerTagline: {
     en: "Indian cuisine, rooted in tradition, served in the heart of Madinah.",
