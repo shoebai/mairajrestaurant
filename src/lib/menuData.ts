@@ -1,3 +1,8 @@
+import butterChickenImg from "@/assets/dishes/butter-chicken.avif"
+import chickenBiryaniImg from "@/assets/dishes/chicken-biryani.jfif"
+import muttonBiryaniImg from "@/assets/dishes/mutton-biryani.avif"
+import prawnsZabardastImg from "@/assets/dishes/prawns-zabardast.jfif"
+
 export interface MenuItem {
   name: string
   nameAr?: string
@@ -226,6 +231,7 @@ export const menu: MenuItem[] = [
   {
     name: "Chicken Makhan Wala",
     featured: true,
+    image: butterChickenImg,
     nameAr: "دجاج بالزبدة (ماخان والا)",
     desc: "",
     price: "30",
@@ -516,6 +522,7 @@ export const menu: MenuItem[] = [
   },
   {
     name: "Prawns Zabardast",
+    image: prawnsZabardastImg,
     nameAr: "روبيان زبردست",
     desc: "",
     price: "44",
@@ -564,6 +571,7 @@ export const menu: MenuItem[] = [
   },
   {
     name: "Mutton Biryani",
+    image: muttonBiryaniImg,
     nameAr: "برياني لحم",
     desc: "",
     price: "28",
@@ -573,6 +581,7 @@ export const menu: MenuItem[] = [
   {
     name: "Chicken Biryani",
     featured: true,
+    image: chickenBiryaniImg,
     nameAr: "برياني دجاج",
     desc: "",
     price: "20",
