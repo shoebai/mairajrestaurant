@@ -1,8 +1,3 @@
-import butterChickenImg from "@/assets/dishes/butter-chicken.avif"
-import chickenBiryaniImg from "@/assets/dishes/chicken-biryani.jfif"
-import muttonBiryaniImg from "@/assets/dishes/mutton-biryani.avif"
-import prawnsZabardastImg from "@/assets/dishes/prawns-zabardast.jfif"
-
 export interface MenuItem {
   name: string
   nameAr?: string
@@ -12,7 +7,7 @@ export interface MenuItem {
   category: string
   categoryAr?: string
   video?: string
-  image?: string
+  slug?: string
   featured?: boolean
 }
 
@@ -94,6 +89,7 @@ export const menu: MenuItem[] = [
   },
   {
     name: "Tandoori Chicken (Half)",
+    slug: "half-tandoori",
     nameAr: "دجاج تنوري (نصف)",
     desc: "",
     price: "18",
@@ -118,6 +114,7 @@ export const menu: MenuItem[] = [
   },
   {
     name: "Mutton Sheek Kabab",
+    slug: "mutton-sheek-kabab",
     nameAr: "كباب سيخ لحم مفروم",
     desc: "",
     price: "27",
@@ -206,6 +203,7 @@ export const menu: MenuItem[] = [
   },
   {
     name: "Chicken Ashiana",
+    slug: "chiken-ashiyana",
     nameAr: "دجاج آشيانا",
     desc: "",
     price: "33",
@@ -231,7 +229,7 @@ export const menu: MenuItem[] = [
   {
     name: "Chicken Makhan Wala",
     featured: true,
-    image: butterChickenImg,
+    slug: "butter-chicken",
     nameAr: "دجاج بالزبدة (ماخان والا)",
     desc: "",
     price: "30",
@@ -240,6 +238,7 @@ export const menu: MenuItem[] = [
   },
   {
     name: "Chicken Jal Ferezi",
+    slug: "chicken-jalfrizi",
     nameAr: "دجاج جال فريزي",
     desc: "",
     price: "30",
@@ -248,6 +247,7 @@ export const menu: MenuItem[] = [
   },
   {
     name: "Chicken 65",
+    slug: "chicken-65",
     nameAr: "دجاج ٦٥",
     desc: "",
     price: "33",
@@ -481,6 +481,7 @@ export const menu: MenuItem[] = [
   },
   {
     name: "Fish Tikka",
+    slug: "fish-tikka",
     nameAr: "سمك تكة",
     desc: "",
     price: "30",
@@ -522,7 +523,7 @@ export const menu: MenuItem[] = [
   },
   {
     name: "Prawns Zabardast",
-    image: prawnsZabardastImg,
+    slug: "prawns-zabardast",
     nameAr: "روبيان زبردست",
     desc: "",
     price: "44",
@@ -571,7 +572,7 @@ export const menu: MenuItem[] = [
   },
   {
     name: "Mutton Biryani",
-    image: muttonBiryaniImg,
+    slug: "mutton-biryani",
     nameAr: "برياني لحم",
     desc: "",
     price: "28",
@@ -581,7 +582,7 @@ export const menu: MenuItem[] = [
   {
     name: "Chicken Biryani",
     featured: true,
-    image: chickenBiryaniImg,
+    slug: "chicken-biryani",
     nameAr: "برياني دجاج",
     desc: "",
     price: "20",

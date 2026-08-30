@@ -1,17 +1,19 @@
 import { useState, useMemo } from "react"
-import { Play, X, Plus, Minus, ShoppingBag, Trash2 } from "lucide-react"
+import { Play, X, Plus, Minus, ShoppingBag, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import Navbar from "@/sections/Navbar"
 import Footer from "@/sections/Footer"
 import { menu, categories, type MenuItem } from "@/lib/menuData"
 import { useT, useLanguage } from "@/lib/i18n"
 import { RESTAURANT_WHATSAPP } from "@/lib/config"
+import { getDishImages } from "@/lib/images"
 
 type Order = Record<string, number>
 type OrderType = "pickup" | "delivery"
 
 export default function MenuPage() {
   const [activeVideo, setActiveVideo] = useState<MenuItem | null>(null)
-  const [activeImage, setActiveImage] = useState<MenuItem | null>(null)
+  const [activeImageItem, setActiveImageItem] = useState<MenuItem | null>(null)
+  const [imageIndex, setImageIndex] = useState(0)
   const [order, setOrder] = useState<Order>({})
   const [cartOpen, setCartOpen] = useState(false)
   const [orderType, setOrderType] = useState<OrderType>("pickup")
@@ -37,6 +39,13 @@ export default function MenuPage() {
     })
 
   const clearOrder = () => setOrder({})
+
+  const openImages = (item: MenuItem) => {
+    setActiveImageItem(item)
+    setImageIndex(0)
+  }
+
+  const activeImages = activeImageItem ? getDishImages(activeImageItem.slug) : []
 
   const sendOrder = () => {
     const lines = Object.entries(order).map(([name, qty]) => {
@@ -93,27 +102,33 @@ export default function MenuPage() {
                     const name = lang === "ar" && item.nameAr ? item.nameAr : item.name
                     const desc = lang === "ar" && item.descAr ? item.descAr : item.desc
                     const qty = order[item.name] ?? 0
-                    const hasImage = Boolean(item.image)
+                    const images = getDishImages(item.slug)
+                    const hasImages = images.length > 0
 
                     return (
                       <div key={item.name} className="flex items-baseline gap-3">
-                        {hasImage && (
+                        {hasImages && (
                           <button
-                            onClick={() => setActiveImage(item)}
+                            onClick={() => openImages(item)}
                             aria-label={t("viewPhoto")}
-                            className="shrink-0 w-14 h-14 rounded overflow-hidden border border-foreground/10 hover:border-gold transition-colors self-center"
+                            className="relative shrink-0 w-14 h-14 rounded overflow-hidden border border-foreground/10 hover:border-gold transition-colors self-center"
                           >
                             <img
-                              src={item.image}
+                              src={images[0]}
                               alt={name}
                               className="w-full h-full object-cover"
                             />
+                            {images.length > 1 && (
+                              <span className="absolute bottom-0.5 right-0.5 bg-black/60 text-cream text-[9px] px-1 rounded-sm leading-tight">
+                                +{images.length - 1}
+                              </span>
+                            )}
                           </button>
                         )}
 
                         <div
-                          className={`flex-1 ${hasImage ? "cursor-pointer" : ""}`}
-                          onClick={() => hasImage && setActiveImage(item)}
+                          className={`flex-1 ${hasImages ? "cursor-pointer" : ""}`}
+                          onClick={() => hasImages && openImages(item)}
                         >
                           <div className="flex items-center gap-2">
                             <h3 className="font-display text-xl">{name}</h3>
@@ -240,7 +255,6 @@ export default function MenuPage() {
                   })}
                 </div>
 
-                {/* Pickup / Delivery selector */}
                 <div className="mb-6">
                   <label className="font-body text-xs tracking-widest uppercase text-foreground/50 block mb-2">
                     {t("orderType")}
@@ -305,27 +319,67 @@ export default function MenuPage() {
         </div>
       )}
 
-      {/* Image modal */}
-      {activeImage && (
+      {/* Image modal — supports multiple photos per dish */}
+      {activeImageItem && activeImages.length > 0 && (
         <div
           className="fixed inset-0 z-[110] bg-black/80 flex items-center justify-center p-6"
-          onClick={() => setActiveImage(null)}
+          onClick={() => setActiveImageItem(null)}
         >
           <div className="relative max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => setActiveImage(null)}
+              onClick={() => setActiveImageItem(null)}
               aria-label="Close image"
               className="absolute -top-10 right-0 text-cream hover:text-gold"
             >
               <X size={24} />
             </button>
-            <img
-              src={activeImage.image}
-              alt={activeImage.name}
-              className="w-full rounded"
-            />
+
+            <div className="relative">
+              <img
+                src={activeImages[imageIndex]}
+                alt={activeImageItem.name}
+                className="w-full rounded"
+              />
+
+              {activeImages.length > 1 && (
+                <>
+                  <button
+                    onClick={() =>
+                      setImageIndex((i) => (i - 1 + activeImages.length) % activeImages.length)
+                    }
+                    aria-label="Previous photo"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-cream rounded-full p-2 transition-colors"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button
+                    onClick={() => setImageIndex((i) => (i + 1) % activeImages.length)}
+                    aria-label="Next photo"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-cream rounded-full p-2 transition-colors"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {activeImages.length > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-4">
+                {activeImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setImageIndex(i)}
+                    aria-label={`Show photo ${i + 1}`}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      i === imageIndex ? "w-6 bg-gold" : "w-1.5 bg-cream/30 hover:bg-cream/50"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+
             <p className="font-display italic text-cream text-center mt-4">
-              {lang === "ar" && activeImage.nameAr ? activeImage.nameAr : activeImage.name}
+              {lang === "ar" && activeImageItem.nameAr ? activeImageItem.nameAr : activeImageItem.name}
             </p>
           </div>
         </div>
