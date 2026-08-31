@@ -2,6 +2,7 @@ import Navbar from "@/sections/Navbar"
 import Hero from "@/sections/Hero"
 import Story from "@/sections/Story"
 import MenuTeaser from "@/sections/MenuTeaser"
+import Offers from "@/sections/Offers"
 import Gallery from "@/sections/Gallery"
 import Locations from "@/sections/Locations"
 import Reservation from "@/sections/Reservation"
@@ -14,6 +15,7 @@ export default function Home() {
       <Hero />
       <Story />
       <MenuTeaser />
+      <Offers />
       <Gallery />
       <Locations />
       <Reservation />

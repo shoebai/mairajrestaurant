@@ -1,13 +1,16 @@
 import { Link } from "react-router"
 import { useReveal } from "@/hooks/useReveal"
-import { menu } from "@/lib/menuData"
+import { useMenuItems } from "@/lib/firestoreMenu"
 import { useT, useLanguage } from "@/lib/i18n"
 
 export default function MenuTeaser() {
   const ref = useReveal<HTMLDivElement>()
   const t = useT()
   const { lang } = useLanguage()
-  const featured = menu.filter((m) => m.featured)
+  const { items } = useMenuItems()
+  const featured = items.filter((m) => m.featured)
+
+  if (featured.length === 0) return null
 
   return (
     <section className="py-24 md:py-32 bg-foreground text-cream">
@@ -16,26 +19,24 @@ export default function MenuTeaser() {
           <p className="font-body text-[0.65rem] tracking-mega uppercase text-gold mb-4">
             {t("menuTeaserEyebrow")}
           </p>
-          <h2 className="font-display text-4xl md:text-5xl">
-            {t("menuTeaserTitle")}
-          </h2>
+          <h2 className="font-display text-4xl md:text-5xl">{t("menuTeaserTitle")}</h2>
         </div>
 
         <div className="flex flex-col gap-7">
           {featured.map((item) => (
-            <div key={item.name} className="flex items-baseline">
+            <div key={item.id} className="flex items-baseline">
               <div>
                 <h3 className="font-display text-xl md:text-2xl text-cream">
                   {lang === "ar" && item.nameAr ? item.nameAr : item.name}
                 </h3>
-                <p className="font-body text-cream/50 text-sm mt-1">
-                  {lang === "ar" && item.descAr ? item.descAr : item.desc}
-                </p>
+                {item.desc && (
+                  <p className="font-body text-cream/50 text-sm mt-1">
+                    {lang === "ar" && item.descAr ? item.descAr : item.desc}
+                  </p>
+                )}
               </div>
               <span className="menu-dots" />
-              <span className="font-display text-lg text-gold shrink-0">
-                {item.price}
-              </span>
+              <span className="font-display text-lg text-gold shrink-0">{item.price}</span>
             </div>
           ))}
         </div>

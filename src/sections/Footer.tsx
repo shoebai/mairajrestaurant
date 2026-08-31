@@ -32,6 +32,9 @@ export default function Footer() {
             <Link to="/menu" className="hover:text-gold transition-colors w-fit">
               {t("navMenu")}
             </Link>
+            <Link to="/about" className="hover:text-gold transition-colors w-fit">
+              {t("navAbout")}
+            </Link>
             <a href="#reservation" className="hover:text-gold transition-colors w-fit">
               {t("reservations")}
             </a>

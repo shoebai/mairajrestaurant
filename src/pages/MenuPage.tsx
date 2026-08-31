@@ -2,24 +2,29 @@ import { useState, useMemo } from "react"
 import { Play, X, Plus, Minus, ShoppingBag, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import Navbar from "@/sections/Navbar"
 import Footer from "@/sections/Footer"
-import { menu, categories, type MenuItem } from "@/lib/menuData"
+import { useMenuItems, type MenuItem } from "@/lib/firestoreMenu"
 import { useT, useLanguage } from "@/lib/i18n"
 import { RESTAURANT_WHATSAPP } from "@/lib/config"
-import { getDishImages } from "@/lib/images"
 
-type Order = Record<string, number>
+type OrderMap = Record<string, number>
 type OrderType = "pickup" | "delivery"
 
 export default function MenuPage() {
+  const { items, loading } = useMenuItems()
   const [activeVideo, setActiveVideo] = useState<MenuItem | null>(null)
   const [activeImageItem, setActiveImageItem] = useState<MenuItem | null>(null)
   const [imageIndex, setImageIndex] = useState(0)
-  const [order, setOrder] = useState<Order>({})
+  const [order, setOrder] = useState<OrderMap>({})
   const [cartOpen, setCartOpen] = useState(false)
   const [orderType, setOrderType] = useState<OrderType>("pickup")
   const [address, setAddress] = useState("")
   const t = useT()
   const { lang } = useLanguage()
+
+  const categories = useMemo(
+    () => Array.from(new Set(items.map((i) => i.category))).filter(Boolean),
+    [items]
+  )
 
   const totalItems = useMemo(
     () => Object.values(order).reduce((sum, qty) => sum + qty, 0),
@@ -45,11 +50,11 @@ export default function MenuPage() {
     setImageIndex(0)
   }
 
-  const activeImages = activeImageItem ? getDishImages(activeImageItem.slug) : []
+  const activeImages = activeImageItem?.images ?? []
 
   const sendOrder = () => {
     const lines = Object.entries(order).map(([name, qty]) => {
-      const item = menu.find((m) => m.name === name)
+      const item = items.find((m) => m.name === name)
       const label = lang === "ar" && item?.nameAr ? item.nameAr : name
       return `${qty}x ${label} — ${item?.price ?? ""}`
     })
@@ -86,10 +91,20 @@ export default function MenuPage() {
             <h1 className="font-display text-4xl md:text-5xl">{t("fullMenuTitle")}</h1>
           </div>
 
+          {loading && (
+            <p className="text-center font-body text-foreground/50">Loading menu...</p>
+          )}
+
+          {!loading && items.length === 0 && (
+            <p className="text-center font-body text-foreground/50">
+              The menu is being updated — check back shortly.
+            </p>
+          )}
+
           {categories.map((category) => {
-            const items = menu.filter((item) => item.category === category)
+            const catItems = items.filter((item) => item.category === category)
             const categoryLabel =
-              lang === "ar" && items[0]?.categoryAr ? items[0].categoryAr : category
+              lang === "ar" && catItems[0]?.categoryAr ? catItems[0].categoryAr : category
 
             return (
               <div key={category} className="mb-16">
@@ -98,26 +113,22 @@ export default function MenuPage() {
                 </h2>
 
                 <div className="flex flex-col gap-6">
-                  {items.map((item) => {
+                  {catItems.map((item) => {
                     const name = lang === "ar" && item.nameAr ? item.nameAr : item.name
                     const desc = lang === "ar" && item.descAr ? item.descAr : item.desc
                     const qty = order[item.name] ?? 0
-                    const images = getDishImages(item.slug)
+                    const images = item.images ?? []
                     const hasImages = images.length > 0
 
                     return (
-                      <div key={item.name} className="flex items-baseline gap-3">
+                      <div key={item.id} className="flex items-baseline gap-3">
                         {hasImages && (
                           <button
                             onClick={() => openImages(item)}
                             aria-label={t("viewPhoto")}
                             className="relative shrink-0 w-14 h-14 rounded overflow-hidden border border-foreground/10 hover:border-gold transition-colors self-center"
                           >
-                            <img
-                              src={images[0]}
-                              alt={name}
-                              className="w-full h-full object-cover"
-                            />
+                            <img src={images[0]} alt={name} className="w-full h-full object-cover" />
                             {images.length > 1 && (
                               <span className="absolute bottom-0.5 right-0.5 bg-black/60 text-cream text-[9px] px-1 rounded-sm leading-tight">
                                 +{images.length - 1}
@@ -146,15 +157,11 @@ export default function MenuPage() {
                             )}
                           </div>
                           {desc && (
-                            <p className="font-body text-foreground/60 text-sm mt-1">
-                              {desc}
-                            </p>
+                            <p className="font-body text-foreground/60 text-sm mt-1">{desc}</p>
                           )}
                         </div>
                         <span className="menu-dots" />
-                        <span className="font-display text-lg text-gold shrink-0">
-                          {item.price}
-                        </span>
+                        <span className="font-display text-lg text-gold shrink-0">{item.price}</span>
 
                         <div className="flex items-center gap-2 shrink-0">
                           {qty > 0 && (
@@ -166,9 +173,7 @@ export default function MenuPage() {
                               >
                                 <Minus size={12} />
                               </button>
-                              <span className="font-body text-sm w-4 text-center">
-                                {qty}
-                              </span>
+                              <span className="font-body text-sm w-4 text-center">{qty}</span>
                             </>
                           )}
                           <button
@@ -189,7 +194,6 @@ export default function MenuPage() {
         </div>
       </main>
 
-      {/* Floating order button */}
       {totalItems > 0 && (
         <button
           onClick={() => setCartOpen(true)}
@@ -200,7 +204,6 @@ export default function MenuPage() {
         </button>
       )}
 
-      {/* Order drawer */}
       {cartOpen && (
         <div
           className="fixed inset-0 z-[100] bg-black/60 flex items-end md:items-center justify-center"
@@ -218,14 +221,12 @@ export default function MenuPage() {
             </div>
 
             {totalItems === 0 ? (
-              <p className="font-body text-foreground/50 text-center py-8">
-                {t("emptyOrder")}
-              </p>
+              <p className="font-body text-foreground/50 text-center py-8">{t("emptyOrder")}</p>
             ) : (
               <>
                 <div className="flex flex-col gap-4 mb-6">
                   {Object.entries(order).map(([name, qty]) => {
-                    const item = menu.find((m) => m.name === name)
+                    const item = items.find((m) => m.name === name)
                     const label = lang === "ar" && item?.nameAr ? item.nameAr : name
                     return (
                       <div key={name} className="flex items-center justify-between">
@@ -319,7 +320,6 @@ export default function MenuPage() {
         </div>
       )}
 
-      {/* Image modal — supports multiple photos per dish */}
       {activeImageItem && activeImages.length > 0 && (
         <div
           className="fixed inset-0 z-[110] bg-black/80 flex items-center justify-center p-6"
@@ -335,11 +335,7 @@ export default function MenuPage() {
             </button>
 
             <div className="relative">
-              <img
-                src={activeImages[imageIndex]}
-                alt={activeImageItem.name}
-                className="w-full rounded"
-              />
+              <img src={activeImages[imageIndex]} alt={activeImageItem.name} className="w-full rounded" />
 
               {activeImages.length > 1 && (
                 <>
@@ -385,7 +381,6 @@ export default function MenuPage() {
         </div>
       )}
 
-      {/* Video modal */}
       {activeVideo && (
         <div
           className="fixed inset-0 z-[110] bg-black/80 flex items-center justify-center p-6"

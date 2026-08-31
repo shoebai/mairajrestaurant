@@ -14,6 +14,7 @@ export default function Navbar() {
   const links = [
     { label: t("navHome"), to: "/" },
     { label: t("navMenu"), to: "/menu" },
+    { label: t("navAbout"), to: "/about" },
   ]
 
   useEffect(() => {

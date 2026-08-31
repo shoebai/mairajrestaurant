@@ -10,6 +10,7 @@ interface Dict {
 const dict: Dict = {
   navHome: { en: "Home", ar: "الرئيسية" },
   navMenu: { en: "Menu", ar: "القائمة" },
+  navAbout: { en: "About", ar: "من نحن" },
   navReserve: { en: "Reserve", ar: "احجز طاولة" },
   brandTagline: { en: "Restaurant · Madinah", ar: "مطعم · المدينة المنورة" },
 
@@ -90,6 +91,18 @@ const dict: Dict = {
   explore: { en: "Explore", ar: "استكشف" },
   reservations: { en: "Reservations", ar: "الحجوزات" },
   contact: { en: "Contact", ar: "تواصل معنا" },
+
+  offersEyebrow: { en: "Special Offers", ar: "عروض خاصة" },
+  offersTitle: { en: "This week at Mairaj", ar: "هذا الأسبوع في مائرج" },
+
+  aboutEyebrow: { en: "About Us", ar: "من نحن" },
+  aboutTitle: { en: "Mairaj Restaurant", ar: "مطعم مائرج" },
+  aboutStoryTitle: { en: "Our Story", ar: "قصتنا" },
+  aboutServicesTitle: { en: "Our Services", ar: "خدماتنا" },
+  aboutStaffTitle: { en: "Our Team", ar: "فريقنا" },
+  aboutCateringTitle: { en: "Catering", ar: "خدمة الضيافة" },
+  aboutLocationTitle: { en: "Location", ar: "الموقع" },
+  aboutContactTitle: { en: "Contact", ar: "تواصل معنا" },
 }
 
 export function useT() {

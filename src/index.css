@@ -96,4 +96,16 @@
     margin: 0 0.75rem;
     transform: translateY(-4px);
   }
+  .admin-input {
+    width: 100%;
+    background: white;
+    border: 1px solid hsl(var(--border));
+    padding: 0.5rem 0.75rem;
+    font-family: 'Jost', system-ui, sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+  }
+  .admin-input:focus {
+    border-color: hsl(42 50% 54%);
+  }
 }
