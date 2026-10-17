@@ -1,30 +1,39 @@
-import { useEffect, useRef } from "react"
+﻿import { useCallback, useRef } from "react"
 
 /**
- * Attaches an IntersectionObserver to the returned ref.
- * Add the `reveal` class to any element using this ref;
- * `is-visible` is added once it scrolls into view (see index.css).
+ * Returns a ref for an element with the `reveal` class; `is-visible` is
+ * added once it scrolls into view (see index.css).
+ *
+ * This is a *callback* ref, so it also works for content that appears later,
+ * e.g. the gallery and featured dishes, which load from the database after
+ * the page has opened.
  */
 export function useReveal<T extends HTMLElement>(threshold = 0.15) {
-  const ref = useRef<T | null>(null)
+  const observerRef = useRef<IntersectionObserver | null>(null)
 
-  useEffect(() => {
-    const node = ref.current
-    if (!node) return
+  return useCallback(
+    (node: T | null) => {
+      observerRef.current?.disconnect()
+      observerRef.current = null
+      if (!node) return
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible")
-          observer.unobserve(entry.target)
-        }
-      },
-      { threshold }
-    )
+      if (typeof IntersectionObserver === "undefined") {
+        node.classList.add("is-visible")
+        return
+      }
 
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [threshold])
-
-  return ref
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible")
+            observer.disconnect()
+          }
+        },
+        { threshold: Math.min(threshold, 0.05) }
+      )
+      observer.observe(node)
+      observerRef.current = observer
+    },
+    [threshold]
+  )
 }
