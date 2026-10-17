@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import MenuPage from './pages/MenuPage'
 import AboutPage from './pages/AboutPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import ScrollManager from './components/ScrollManager'
 
 // Admin pages are loaded on demand only when someone visits /admin —
 // public visitors never download this code.
@@ -14,6 +15,7 @@ const AdminMenu = lazy(() => import('./pages/admin/AdminMenu'))
 const AdminOffers = lazy(() => import('./pages/admin/AdminOffers'))
 const AdminGallery = lazy(() => import('./pages/admin/AdminGallery'))
 const AdminAbout = lazy(() => import('./pages/admin/AdminAbout'))
+const AdminHomepage = lazy(() => import('./pages/admin/AdminHomepage'))
 const AdminSeed = lazy(() => import('./pages/admin/AdminSeed'))
 
 function AdminFallback() {
@@ -26,6 +28,8 @@ function AdminFallback() {
 
 export default function App() {
   return (
+    <>
+    <ScrollManager />
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/menu" element={<MenuPage />} />
@@ -54,8 +58,10 @@ export default function App() {
         <Route path="offers" element={<AdminOffers />} />
         <Route path="gallery" element={<AdminGallery />} />
         <Route path="about" element={<AdminAbout />} />
+        <Route path="homepage" element={<AdminHomepage />} />
         <Route path="seed" element={<AdminSeed />} />
       </Route>
     </Routes>
+    </>
   )
 }

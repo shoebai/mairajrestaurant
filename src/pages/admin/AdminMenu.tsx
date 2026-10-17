@@ -1,5 +1,7 @@
-import { useState } from "react"
-import { Plus, Pencil, Trash2, X, Upload, Loader2 } from "lucide-react"
+import { useCallback, useMemo, useState } from "react"
+import { useSearchParams } from "react-router"
+import { toast } from "sonner"
+import { Plus, Pencil, Trash2, Search, Camera, Star, Loader2 } from "lucide-react"
 import {
   useMenuItems,
   addMenuItem,
@@ -7,7 +9,16 @@ import {
   deleteMenuItem,
   type MenuItem,
 } from "@/lib/firestoreMenu"
-import { uploadImage, deleteImageByUrl } from "@/lib/storage"
+import { optimizedImage } from "@/lib/storage"
+import ImageUploader from "@/components/admin/ImageUploader"
+import {
+  AdminModal,
+  BilingualRow,
+  Field,
+  PageHeader,
+  PrimaryButton,
+  Toggle,
+} from "@/components/admin/AdminUI"
 
 const emptyForm = {
   name: "",
@@ -22,304 +33,358 @@ const emptyForm = {
   images: [] as string[],
 }
 
+type Form = typeof emptyForm
+
+function toForm(item: MenuItem): Form {
+  return {
+    name: item.name,
+    nameAr: item.nameAr ?? "",
+    desc: item.desc ?? "",
+    descAr: item.descAr ?? "",
+    price: item.price,
+    category: item.category,
+    categoryAr: item.categoryAr ?? "",
+    video: item.video ?? "",
+    featured: item.featured ?? false,
+    images: item.images ?? [],
+  }
+}
+
 export default function AdminMenu() {
   const { items, loading } = useMenuItems()
+  const [params, setParams] = useSearchParams()
   const [editing, setEditing] = useState<MenuItem | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState(emptyForm)
+  const [form, setForm] = useState<Form>(emptyForm)
+  const [initial, setInitial] = useState<Form>(emptyForm)
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [search, setSearch] = useState("")
 
-  const categories = Array.from(new Set(items.map((i) => i.category))).filter(Boolean)
+  const category = params.get("category") ?? ""
+  const noPhotoOnly = params.get("filter") === "no-photo"
 
-  const openNew = () => {
-    setEditing(null)
-    setForm(emptyForm)
-    setShowForm(true)
-  }
+  const categories = useMemo(
+    () => Array.from(new Set(items.map((i) => i.category))).filter(Boolean),
+    [items]
+  )
 
-  const openEdit = (item: MenuItem) => {
-    setEditing(item)
-    setForm({
-      name: item.name,
-      nameAr: item.nameAr ?? "",
-      desc: item.desc ?? "",
-      descAr: item.descAr ?? "",
-      price: item.price,
-      category: item.category,
-      categoryAr: item.categoryAr ?? "",
-      video: item.video ?? "",
-      featured: item.featured ?? false,
-      images: item.images ?? [],
-    })
-    setShowForm(true)
-  }
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-    setUploading(true)
-    try {
-      const urls = await Promise.all(
-        Array.from(files).map((f) => uploadImage(f, "menu-items"))
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return items.filter((i) => {
+      if (category && i.category !== category) return false
+      if (noPhotoOnly && i.images?.length) return false
+      if (!q) return true
+      return (
+        i.name.toLowerCase().includes(q) ||
+        (i.nameAr ?? "").includes(q) ||
+        i.category.toLowerCase().includes(q)
       )
-      setForm((f) => ({ ...f, images: [...f.images, ...urls] }))
-    } finally {
-      setUploading(false)
-      e.target.value = ""
-    }
+    })
+  }, [items, search, category, noPhotoOnly])
+
+  const setFilter = (key: string, value: string) => {
+    const next = new URLSearchParams(params)
+    if (value) next.set(key, value)
+    else next.delete(key)
+    setParams(next, { replace: true })
   }
 
-  const removeImage = (url: string) => {
-    setForm((f) => ({ ...f, images: f.images.filter((i) => i !== url) }))
+  const open = (item: MenuItem | null) => {
+    const f = item ? toForm(item) : { ...emptyForm, category: category || "" }
+    if (!item && category) {
+      f.categoryAr = items.find((i) => i.category === category)?.categoryAr ?? ""
+    }
+    setEditing(item)
+    setForm(f)
+    setInitial(f)
+    setShowForm(true)
+  }
+
+  const dirty = JSON.stringify(form) !== JSON.stringify(initial)
+  const onBusyChange = useCallback((b: boolean) => setUploading(b), [])
+
+  // When an existing category is typed, fill in its Arabic name automatically.
+  const setCategory = (value: string) => {
+    const match = items.find((i) => i.category === value)
+    setForm((f) => ({
+      ...f,
+      category: value,
+      categoryAr: match?.categoryAr && !f.categoryAr ? match.categoryAr : f.categoryAr,
+    }))
   }
 
   const handleSave = async () => {
     setSaving(true)
     try {
-      const data = {
-        ...form,
-        order: editing?.order ?? items.length,
-      }
+      const data = { ...form, order: editing?.order ?? items.length }
       if (editing) {
         await updateMenuItem(editing.id, data)
+        toast.success(`Saved "${form.name}"`)
       } else {
         await addMenuItem(data)
+        toast.success(`Added "${form.name}" to the menu`)
       }
       setShowForm(false)
+    } catch {
+      toast.error("Couldn't save. Check your connection and try again.")
     } finally {
       setSaving(false)
     }
   }
 
   const handleDelete = async (item: MenuItem) => {
-    if (!confirm(`Delete "${item.name}"? This cannot be undone.`)) return
-    for (const url of item.images ?? []) {
-      await deleteImageByUrl(url)
+    if (!confirm(`Delete "${item.name}" from the menu? This can't be undone.`)) return
+    try {
+      await deleteMenuItem(item.id)
+      toast.success(`Deleted "${item.name}"`)
+    } catch {
+      toast.error("Couldn't delete. Check your connection and try again.")
     }
-    await deleteMenuItem(item.id)
+  }
+
+  const toggleFeatured = async (item: MenuItem) => {
+    try {
+      await updateMenuItem(item.id, { featured: !item.featured })
+      toast.success(item.featured ? `Removed "${item.name}" from homepage` : `"${item.name}" is now on the homepage`)
+    } catch {
+      toast.error("Couldn't update. Try again.")
+    }
   }
 
   return (
-    <div className="p-8 max-w-5xl">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="font-display text-3xl mb-1">Menu Items</h1>
-          <p className="font-body text-foreground/60 text-sm">{items.length} dishes</p>
+    <div>
+      <PageHeader
+        title="Menu"
+        subtitle={`${items.length} dishes · tap a dish to edit it or add photos`}
+        action={
+          <PrimaryButton onClick={() => open(null)}>
+            <Plus size={18} /> Add dish
+          </PrimaryButton>
+        }
+      />
+
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search dishes"
+            className="admin-input !pl-9"
+          />
         </div>
-        <button
-          onClick={openNew}
-          className="flex items-center gap-2 bg-gold text-cream px-5 py-2.5 text-xs tracking-widest uppercase font-body hover:bg-gold/90 transition-colors"
+        <select
+          value={category}
+          onChange={(e) => setFilter("category", e.target.value)}
+          className="admin-input sm:w-56"
+          aria-label="Filter by category"
         >
-          <Plus size={16} /> Add Dish
+          <option value="">All categories</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={() => setFilter("filter", noPhotoOnly ? "" : "no-photo")}
+          className={`inline-flex items-center justify-center gap-2 rounded-md border px-4 py-2 font-body text-sm transition-colors ${
+            noPhotoOnly ? "border-gold bg-gold/10 text-foreground" : "border-foreground/15 bg-white text-foreground/70 hover:border-gold"
+          }`}
+        >
+          <Camera size={16} /> Needs a photo
         </button>
       </div>
 
       {loading ? (
-        <p className="font-body text-foreground/50">Loading...</p>
+        <p className="flex items-center gap-2 font-body text-foreground/50">
+          <Loader2 size={16} className="animate-spin" /> Loading menu…
+        </p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {items.map((item) => (
-            <div
+        <ul className="flex flex-col gap-2">
+          {visible.map((item) => (
+            <li
               key={item.id}
-              className="flex items-center gap-4 bg-white border border-foreground/10 p-4 rounded"
+              className="flex items-center gap-3 rounded-lg border border-foreground/10 bg-white p-2.5 pr-2 sm:gap-4 sm:p-3"
             >
-              {item.images?.[0] ? (
-                <img
-                  src={item.images[0]}
-                  alt={item.name}
-                  className="w-12 h-12 rounded object-cover shrink-0"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded bg-foreground/5 shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="font-display text-lg truncate">{item.name}</p>
-                <p className="font-body text-xs text-foreground/50">
-                  {item.category} &middot; {item.price}
-                  {item.featured && <span className="text-gold"> &middot; Featured</span>}
-                </p>
-              </div>
               <button
-                onClick={() => openEdit(item)}
-                className="p-2 text-foreground/50 hover:text-gold transition-colors"
-                aria-label="Edit"
+                onClick={() => open(item)}
+                className="flex min-w-0 flex-1 items-center gap-3 text-left sm:gap-4"
               >
-                <Pencil size={16} />
+                {item.images?.[0] ? (
+                  <img
+                    src={optimizedImage(item.images[0], 160)}
+                    alt=""
+                    className="h-14 w-14 shrink-0 rounded-md object-cover"
+                  />
+                ) : (
+                  <span className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-md border border-dashed border-foreground/20 text-foreground/35">
+                    <Camera size={16} />
+                    <span className="font-body text-[9px]">Add photo</span>
+                  </span>
+                )}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-display text-lg leading-tight">{item.name}</span>
+                  <span className="block truncate font-body text-xs text-foreground/55">
+                    {item.category} · {item.price} SAR
+                    {(item.images?.length ?? 0) > 1 && ` · ${item.images!.length} photos`}
+                  </span>
+                </span>
+              </button>
+              <button
+                onClick={() => toggleFeatured(item)}
+                title={item.featured ? "Shown on homepage" : "Show on homepage"}
+                aria-label={item.featured ? "Remove from homepage" : "Show on homepage"}
+                className={`rounded-md p-2 transition-colors ${item.featured ? "text-gold" : "text-foreground/25 hover:text-gold"}`}
+              >
+                <Star size={18} fill={item.featured ? "currentColor" : "none"} />
+              </button>
+              <button
+                onClick={() => open(item)}
+                aria-label={`Edit ${item.name}`}
+                className="hidden rounded-md p-2 text-foreground/50 transition-colors hover:text-gold sm:block"
+              >
+                <Pencil size={17} />
               </button>
               <button
                 onClick={() => handleDelete(item)}
-                className="p-2 text-foreground/50 hover:text-destructive transition-colors"
-                aria-label="Delete"
+                aria-label={`Delete ${item.name}`}
+                className="rounded-md p-2 text-foreground/40 transition-colors hover:text-destructive"
               >
-                <Trash2 size={16} />
+                <Trash2 size={17} />
               </button>
-            </div>
+            </li>
           ))}
           {items.length === 0 && (
-            <p className="font-body text-foreground/50 text-center py-12">
-              No dishes yet. Add your first one, or use "Import Starter Data" to load your existing menu.
-            </p>
+            <li className="rounded-lg border border-dashed border-foreground/20 py-12 text-center font-body text-foreground/60">
+              No dishes yet. Add your first one, or use “Import starter menu” to load the existing menu.
+            </li>
           )}
-        </div>
+          {items.length > 0 && visible.length === 0 && (
+            <li className="py-10 text-center font-body text-foreground/60">
+              No dishes match. Try a different search or category.
+            </li>
+          )}
+        </ul>
       )}
 
       {showForm && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-6"
-          onClick={() => setShowForm(false)}
+        <AdminModal
+          title={editing ? "Edit dish" : "Add a dish"}
+          onClose={() => setShowForm(false)}
+          dirty={dirty}
+          footer={
+            <PrimaryButton
+              onClick={handleSave}
+              disabled={saving || uploading || !form.name.trim() || !form.price.trim()}
+            >
+              {saving && <Loader2 size={16} className="animate-spin" />}
+              {uploading ? "Waiting for photos…" : saving ? "Saving…" : editing ? "Save changes" : "Add dish"}
+            </PrimaryButton>
+          }
         >
-          <div
-            className="bg-cream w-full max-w-lg rounded-lg p-6 max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display text-2xl">{editing ? "Edit Dish" : "Add Dish"}</h2>
-              <button onClick={() => setShowForm(false)}>
-                <X size={22} />
-              </button>
-            </div>
+          <Field label="Photos">
+            <ImageUploader
+              value={form.images}
+              onChange={(images) => setForm((f) => ({ ...f, images }))}
+              folder="menu-items"
+              onBusyChange={onBusyChange}
+              hint="The first photo is shown on the menu. Add more and guests can swipe through them."
+            />
+          </Field>
 
-            <div className="flex flex-col gap-4">
-              <Field label="Name (English)">
-                <input
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="admin-input"
-                />
-              </Field>
-              <Field label="Name (Arabic)">
-                <input
-                  value={form.nameAr}
-                  onChange={(e) => setForm({ ...form, nameAr: e.target.value })}
-                  dir="rtl"
-                  className="admin-input"
-                />
-              </Field>
-              <Field label="Description (English)">
-                <textarea
-                  value={form.desc}
-                  onChange={(e) => setForm({ ...form, desc: e.target.value })}
-                  rows={2}
-                  className="admin-input resize-none"
-                />
-              </Field>
-              <Field label="Description (Arabic)">
-                <textarea
-                  value={form.descAr}
-                  onChange={(e) => setForm({ ...form, descAr: e.target.value })}
-                  rows={2}
-                  dir="rtl"
-                  className="admin-input resize-none"
-                />
-              </Field>
+          <BilingualRow>
+            <Field label="Dish name (English)">
+              <input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="admin-input"
+                placeholder="Chicken Biryani"
+              />
+            </Field>
+            <Field label="Dish name (Arabic)">
+              <input
+                value={form.nameAr}
+                onChange={(e) => setForm({ ...form, nameAr: e.target.value })}
+                dir="rtl"
+                className="admin-input"
+                placeholder="برياني دجاج"
+              />
+            </Field>
+          </BilingualRow>
 
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Price">
-                  <input
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: e.target.value })}
-                    className="admin-input"
-                  />
-                </Field>
-                <Field label="Category">
-                  <input
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    list="categories"
-                    className="admin-input"
-                  />
-                  <datalist id="categories">
-                    {categories.map((c) => (
-                      <option key={c} value={c} />
-                    ))}
-                  </datalist>
-                </Field>
-              </div>
+          <BilingualRow>
+            <Field label="Price (SAR)">
+              <input
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                inputMode="decimal"
+                className="admin-input"
+                placeholder="20"
+              />
+            </Field>
+            <Field label="Category" hint="Pick an existing one or type a new name.">
+              <input
+                value={form.category}
+                onChange={(e) => setCategory(e.target.value)}
+                list="menu-categories"
+                className="admin-input"
+              />
+              <datalist id="menu-categories">
+                {categories.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+            </Field>
+          </BilingualRow>
 
-              <Field label="Category (Arabic)">
-                <input
-                  value={form.categoryAr}
-                  onChange={(e) => setForm({ ...form, categoryAr: e.target.value })}
-                  dir="rtl"
-                  className="admin-input"
-                />
-              </Field>
+          <Field label="Category (Arabic)">
+            <input
+              value={form.categoryAr}
+              onChange={(e) => setForm({ ...form, categoryAr: e.target.value })}
+              dir="rtl"
+              className="admin-input"
+            />
+          </Field>
 
-              <Field label="Video URL (optional)">
-                <input
-                  value={form.video}
-                  onChange={(e) => setForm({ ...form, video: e.target.value })}
-                  placeholder="/videos/dish.mp4"
-                  className="admin-input"
-                />
-              </Field>
+          <BilingualRow>
+            <Field label="Short description (English)" hint="Optional">
+              <textarea
+                value={form.desc}
+                onChange={(e) => setForm({ ...form, desc: e.target.value })}
+                rows={2}
+                className="admin-input resize-none"
+              />
+            </Field>
+            <Field label="Short description (Arabic)" hint="Optional">
+              <textarea
+                value={form.descAr}
+                onChange={(e) => setForm({ ...form, descAr: e.target.value })}
+                rows={2}
+                dir="rtl"
+                className="admin-input resize-none"
+              />
+            </Field>
+          </BilingualRow>
 
-              <label className="flex items-center gap-2 font-body text-sm">
-                <input
-                  type="checkbox"
-                  checked={form.featured}
-                  onChange={(e) => setForm({ ...form, featured: e.target.checked })}
-                />
-                Feature on homepage
-              </label>
+          <Toggle
+            checked={form.featured}
+            onChange={(featured) => setForm({ ...form, featured })}
+            label="Show on homepage"
+            description="Featured dishes appear in “A few house favourites”."
+          />
 
-              <Field label="Photos">
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {form.images.map((url) => (
-                    <div key={url} className="relative w-16 h-16">
-                      <img src={url} className="w-full h-full object-cover rounded" />
-                      <button
-                        onClick={() => removeImage(url)}
-                        className="absolute -top-1.5 -right-1.5 bg-destructive text-white rounded-full w-5 h-5 flex items-center justify-center"
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <label className="flex items-center gap-2 border border-dashed border-foreground/30 rounded px-4 py-3 cursor-pointer hover:border-gold transition-colors w-fit">
-                  {uploading ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <Upload size={16} />
-                  )}
-                  <span className="font-body text-sm">
-                    {uploading ? "Uploading..." : "Upload photo(s)"}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleUpload}
-                    className="hidden"
-                    disabled={uploading}
-                  />
-                </label>
-              </Field>
-
-              <button
-                onClick={handleSave}
-                disabled={saving || uploading || !form.name || !form.price}
-                className="mt-2 bg-gold text-cream py-3 text-xs tracking-mega uppercase font-body hover:bg-gold/90 transition-colors disabled:opacity-40"
-              >
-                {saving ? "Saving..." : editing ? "Save Changes" : "Add Dish"}
-              </button>
-            </div>
-          </div>
-        </div>
+          <Field label="Video link" hint="Optional. A link to an .mp4 video of this dish.">
+            <input
+              value={form.video}
+              onChange={(e) => setForm({ ...form, video: e.target.value })}
+              placeholder="https://…/dish.mp4"
+              className="admin-input"
+            />
+          </Field>
+        </AdminModal>
       )}
-    </div>
-  )
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="font-body text-xs tracking-widest uppercase text-foreground/50 block mb-1.5">
-        {label}
-      </label>
-      {children}
     </div>
   )
 }

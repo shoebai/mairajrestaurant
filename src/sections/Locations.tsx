@@ -29,7 +29,7 @@ export default function Locations() {
   const { lang } = useLanguage()
 
   return (
-    <section className="py-24 md:py-32 bg-foreground text-cream">
+    <section id="location" className="py-24 md:py-32 bg-foreground text-cream">
       <div className="max-w-5xl mx-auto px-6">
         <div className="text-center mb-14">
           <p className="font-body text-[0.65rem] tracking-mega uppercase text-gold mb-4">

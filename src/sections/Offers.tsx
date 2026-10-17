@@ -1,6 +1,7 @@
 import { useReveal } from "@/hooks/useReveal"
 import { useT, useLanguage } from "@/lib/i18n"
 import { useOffers } from "@/lib/firestoreOffers"
+import { optimizedImage } from "@/lib/storage"
 
 export default function Offers() {
   const ref = useReveal<HTMLDivElement>()
@@ -11,7 +12,7 @@ export default function Offers() {
   if (!loading && offers.length === 0) return null
 
   return (
-    <section className="py-24 md:py-32 bg-cream">
+    <section id="offers" className="py-24 md:py-32 bg-cream">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-14">
           <p className="font-body text-[0.65rem] tracking-mega uppercase text-gold mb-4">
@@ -28,7 +29,7 @@ export default function Offers() {
             >
               {offer.image && (
                 <div className="aspect-video overflow-hidden">
-                  <img src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
+                  <img src={optimizedImage(offer.image, 900)} alt={offer.title} loading="lazy" className="w-full h-full object-cover" />
                 </div>
               )}
               <div className="p-6">

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate } from "react-router"
+import { Navigate, useNavigate } from "react-router"
 import { useAuth } from "@/lib/auth"
 import logo from "@/assets/mairaj-logo.jpeg"
 
@@ -11,9 +11,7 @@ export default function AdminLogin() {
   const [error, setError] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
-  if (user) {
-    navigate("/admin", { replace: true })
-  }
+  if (user) return <Navigate to="/admin" replace />
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,7 +21,7 @@ export default function AdminLogin() {
       await login(email, password)
       navigate("/admin", { replace: true })
     } catch {
-      setError("Incorrect email or password.")
+      setError("That email and password don't match. Check them and try again.")
     } finally {
       setSubmitting(false)
     }
@@ -39,7 +37,7 @@ export default function AdminLogin() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="font-body text-xs tracking-widest uppercase text-cream/50 block mb-2">
+            <label className="mb-2 block font-body text-sm text-cream/70">
               Email
             </label>
             <input
@@ -47,11 +45,11 @@ export default function AdminLogin() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-transparent border border-cream/20 focus:border-gold outline-none py-2.5 px-3 font-body text-cream"
+              className="w-full bg-transparent border border-cream/20 focus:border-gold outline-none rounded-md py-3 px-3 font-body text-base text-cream"
             />
           </div>
           <div>
-            <label className="font-body text-xs tracking-widest uppercase text-cream/50 block mb-2">
+            <label className="mb-2 block font-body text-sm text-cream/70">
               Password
             </label>
             <input
@@ -59,7 +57,7 @@ export default function AdminLogin() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-transparent border border-cream/20 focus:border-gold outline-none py-2.5 px-3 font-body text-cream"
+              className="w-full bg-transparent border border-cream/20 focus:border-gold outline-none rounded-md py-3 px-3 font-body text-base text-cream"
             />
           </div>
 
@@ -70,9 +68,9 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-2 bg-gold text-cream py-3 text-xs tracking-mega uppercase font-body hover:bg-gold/90 transition-colors disabled:opacity-50"
+            className="mt-2 rounded-md bg-gold py-3 font-body text-base font-medium text-white transition-colors hover:bg-gold/90 disabled:opacity-50"
           >
-            {submitting ? "Signing in..." : "Sign In"}
+            {submitting ? "Signing in…" : "Sign in"}
           </button>
         </form>
       </div>

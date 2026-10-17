@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useReveal } from "@/hooks/useReveal"
 import { useT, useLanguage } from "@/lib/i18n"
 import { useGallery } from "@/lib/firestoreGallery"
+import { optimizedImage } from "@/lib/storage"
 
 const SLIDE_INTERVAL = 3500
 
@@ -33,8 +34,9 @@ function GalleryTile({
       {images.map((src, i) => (
         <img
           key={src}
-          src={src}
+          src={optimizedImage(src, large ? 1400 : 800)}
           alt={title}
+          loading="lazy"
           className="absolute inset-0 w-full h-full object-cover transition-opacity ease-in-out"
           style={{ opacity: i === active ? 1 : 0, transitionDuration: "1200ms" }}
         />
@@ -74,7 +76,7 @@ export default function Gallery() {
   if (!loading && entries.length === 0) return null
 
   return (
-    <section className="py-24 md:py-32 bg-cream">
+    <section id="gallery" className="py-24 md:py-32 bg-cream">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-6">
           <p className="font-body text-[0.65rem] tracking-mega uppercase text-gold mb-4">

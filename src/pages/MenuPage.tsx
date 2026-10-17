@@ -5,6 +5,7 @@ import Footer from "@/sections/Footer"
 import { useMenuItems, type MenuItem } from "@/lib/firestoreMenu"
 import { useT, useLanguage } from "@/lib/i18n"
 import { RESTAURANT_WHATSAPP } from "@/lib/config"
+import { optimizedImage } from "@/lib/storage"
 
 type OrderMap = Record<string, number>
 type OrderType = "pickup" | "delivery"
@@ -128,7 +129,7 @@ export default function MenuPage() {
                             aria-label={t("viewPhoto")}
                             className="relative shrink-0 w-14 h-14 rounded overflow-hidden border border-foreground/10 hover:border-gold transition-colors self-center"
                           >
-                            <img src={images[0]} alt={name} className="w-full h-full object-cover" />
+                            <img src={optimizedImage(images[0], 160)} alt={name} loading="lazy" className="w-full h-full object-cover" />
                             {images.length > 1 && (
                               <span className="absolute bottom-0.5 right-0.5 bg-black/60 text-cream text-[9px] px-1 rounded-sm leading-tight">
                                 +{images.length - 1}
@@ -335,7 +336,7 @@ export default function MenuPage() {
             </button>
 
             <div className="relative">
-              <img src={activeImages[imageIndex]} alt={activeImageItem.name} className="w-full rounded" />
+              <img src={optimizedImage(activeImages[imageIndex], 1400)} alt={activeImageItem.name} className="w-full rounded" />
 
               {activeImages.length > 1 && (
                 <>

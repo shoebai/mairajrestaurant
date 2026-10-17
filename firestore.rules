@@ -2,8 +2,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Anyone can read the menu, offers, gallery, and about content —
-    // needed so the public website can display them.
+    // Anyone can read the menu, offers, gallery, about content and site
+    // settings — needed so the public website can display them.
     // Only a signed-in admin (logged into /admin) can create, edit, or delete.
     match /menuItems/{itemId} {
       allow read: if true;
@@ -21,6 +21,12 @@ service cloud.firestore {
     }
 
     match /about/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Homepage photos and other site settings.
+    match /site/{docId} {
       allow read: if true;
       allow write: if request.auth != null;
     }

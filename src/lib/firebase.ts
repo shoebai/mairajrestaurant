@@ -1,11 +1,14 @@
 import { initializeApp } from "firebase/app"
 import { getAuth, connectAuthEmulator } from "firebase/auth"
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore"
-import { getStorage, connectStorageEmulator } from "firebase/storage"
 
+// Firebase is used only for the admin login and the text content (menu,
+// offers, gallery entries, About page). Photos live on Cloudinary — see
+// src/lib/storage.ts.
+//
 // Public config — safe to expose in client code. Real security comes
-// from the Firestore/Storage rules (see firestore.rules and storage.rules
-// in this project, which you paste into the Firebase console).
+// from the Firestore rules (see firestore.rules in this project, which you
+// paste into the Firebase console).
 const firebaseConfig = {
   apiKey: "AIzaSyAMfcgA93rjA0Urrm8KdL4C1nMPEte8H8I",
   authDomain: "mairaj-restaruant.firebaseapp.com",
@@ -19,14 +22,11 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const db = getFirestore(app)
-export const storage = getStorage(app)
 
-// When running via `docker compose up` (or `npm run dev` with
-// VITE_USE_EMULATOR=true), talk to the local Firebase emulators instead
-// of the real cloud project. Never happens in a production build.
+// When running with VITE_USE_EMULATOR=true, talk to the local Firebase
+// emulators instead of the real cloud project. Never happens in production.
 if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === "true") {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true })
   connectFirestoreEmulator(db, "127.0.0.1", 8080)
-  connectStorageEmulator(storage, "127.0.0.1", 9199)
   console.log("🔥 Using local Firebase emulators")
 }

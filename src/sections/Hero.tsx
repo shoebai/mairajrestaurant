@@ -1,23 +1,35 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import { useT } from "@/lib/i18n"
+import { useHeroSettings } from "@/lib/firestoreSite"
+import { optimizedImage } from "@/lib/storage"
 import hero1 from "@/assets/hero/hero-1.webp"
 import hero2 from "@/assets/hero/hero-2.webp"
 import hero3 from "@/assets/hero/hero-3.webp"
 
-const slides = [hero1, hero2, hero3]
+// Shown until photos are uploaded in Admin → Homepage photos.
+const defaultSlides = [hero1, hero2, hero3]
 const SLIDE_DURATION = 5000
 
 export default function Hero() {
   const t = useT()
   const [active, setActive] = useState(0)
+  const { hero, loading } = useHeroSettings()
+
+  const slides = loading
+    ? []
+    : hero.images.length > 0
+      ? hero.images.map((url) => optimizedImage(url, 1920))
+      : defaultSlides
 
   useEffect(() => {
+    setActive(0)
+    if (slides.length < 2) return
     const id = setInterval(() => {
       setActive((i) => (i + 1) % slides.length)
     }, SLIDE_DURATION)
     return () => clearInterval(id)
-  }, [])
+  }, [slides.length])
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-foreground">

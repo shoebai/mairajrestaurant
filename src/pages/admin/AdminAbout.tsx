@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import { useAbout, updateAbout } from "@/lib/firestoreAbout"
+import { PageHeader, PrimaryButton } from "@/components/admin/AdminUI"
 
 export default function AdminAbout() {
   const { about, loading } = useAbout()
   const [form, setForm] = useState(about)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     setForm(about)
@@ -13,26 +14,23 @@ export default function AdminAbout() {
 
   const handleSave = async () => {
     setSaving(true)
-    setSaved(false)
     try {
       await updateAbout(form)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
+      toast.success("About page saved")
+    } catch {
+      toast.error("Couldn't save. Check your connection and try again.")
     } finally {
       setSaving(false)
     }
   }
 
   if (loading) {
-    return <p className="p-8 font-body text-foreground/50">Loading...</p>
+    return <p className="font-body text-foreground/50">Loading…</p>
   }
 
   return (
-    <div className="p-8 max-w-2xl">
-      <h1 className="font-display text-3xl mb-1">About Us</h1>
-      <p className="font-body text-foreground/60 text-sm mb-8">
-        This content appears on the site's About page.
-      </p>
+    <div className="max-w-3xl">
+      <PageHeader title="About us" subtitle="This text appears on the website's About page." />
 
       <div className="flex flex-col gap-6">
         <Section title="Our Story">
@@ -55,7 +53,7 @@ export default function AdminAbout() {
           </Field>
         </Section>
 
-        <Section title="Services">
+        <Section title="Our services">
           <Field label="English">
             <textarea
               value={form.services}
@@ -75,7 +73,7 @@ export default function AdminAbout() {
           </Field>
         </Section>
 
-        <Section title="Staff">
+        <Section title="Our team">
           <Field label="English">
             <textarea
               value={form.staff}
@@ -115,7 +113,7 @@ export default function AdminAbout() {
           </Field>
         </Section>
 
-        <Section title="Location">
+        <Section title="Address">
           <Field label="English">
             <textarea
               value={form.location}
@@ -135,7 +133,7 @@ export default function AdminAbout() {
           </Field>
         </Section>
 
-        <Section title="Contact">
+        <Section title="Contact details">
           <Field label="Phone">
             <input
               value={form.phone ?? ""}
@@ -160,15 +158,10 @@ export default function AdminAbout() {
           </Field>
         </Section>
 
-        <div className="flex items-center gap-4">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-gold text-cream px-8 py-3 text-xs tracking-mega uppercase font-body hover:bg-gold/90 transition-colors disabled:opacity-50"
-          >
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-          {saved && <span className="font-body text-sm text-gold">Saved</span>}
+        <div className="sticky bottom-0 -mx-4 flex items-center gap-4 border-t border-foreground/10 bg-[hsl(38_24%_97%)]/95 px-4 py-4 backdrop-blur md:mx-0 md:px-0">
+          <PrimaryButton onClick={handleSave} disabled={saving}>
+            {saving ? "Saving…" : "Save changes"}
+          </PrimaryButton>
         </div>
       </div>
     </div>
@@ -177,7 +170,7 @@ export default function AdminAbout() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-foreground/10 rounded p-5">
+    <div className="rounded-xl border border-foreground/10 bg-white p-5">
       <h2 className="font-display text-xl mb-4">{title}</h2>
       <div className="grid md:grid-cols-2 gap-4">{children}</div>
     </div>
@@ -187,7 +180,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="font-body text-xs tracking-widest uppercase text-foreground/50 block mb-1.5">
+      <label className="mb-1.5 block font-body text-sm font-medium text-foreground/70">
         {label}
       </label>
       {children}
