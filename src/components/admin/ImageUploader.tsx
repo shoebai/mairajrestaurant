@@ -8,9 +8,12 @@ import {
   AlertCircle,
   RotateCcw,
   Loader2,
+  Sparkles,
 } from "lucide-react"
+import { toast } from "sonner"
 import {
   uploadImage,
+  makeWhiteBackground,
   deleteImageByUrl,
   isImageFile,
   isStorageConfigured,
@@ -23,6 +26,7 @@ interface PendingUpload {
   file: File
   preview: string
   progress: number
+  stage: "upload" | "background"
   error?: string
 }
 
@@ -37,7 +41,11 @@ interface ImageUploaderProps {
   /** Lets the parent disable its Save button while uploads are running. */
   onBusyChange?: (busy: boolean) => void
   hint?: string
+  /** Offer automatic white backgrounds (AI background removal). */
+  whiteBackground?: boolean
 }
+
+const WHITE_BG_PREF = "mairaj-admin-white-bg"
 
 let idCounter = 0
 
@@ -48,16 +56,34 @@ export default function ImageUploader({
   multiple = true,
   onBusyChange,
   hint,
+  whiteBackground = false,
 }: ImageUploaderProps) {
   const [pending, setPending] = useState<PendingUpload[]>([])
   const [dragging, setDragging] = useState(false)
+  const [converting, setConverting] = useState<string[]>([])
+  // Remember the admin's choice on this device; on by default.
+  const [removeBg, setRemoveBg] = useState(() => {
+    try {
+      return localStorage.getItem(WHITE_BG_PREF) !== "off"
+    } catch {
+      return true
+    }
+  })
+  const toggleRemoveBg = (on: boolean) => {
+    setRemoveBg(on)
+    try {
+      localStorage.setItem(WHITE_BG_PREF, on ? "on" : "off")
+    } catch {
+      // Not important if it can't be remembered.
+    }
+  }
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Uploads finish one by one, so always add to the newest list of photos.
   const valueRef = useRef(value)
   valueRef.current = value
 
-  const busy = pending.some((p) => !p.error)
+  const busy = pending.some((p) => !p.error) || converting.length > 0
   useEffect(() => {
     onBusyChange?.(busy)
   }, [busy, onBusyChange])
@@ -78,9 +104,19 @@ export default function ImageUploader({
     })
 
   const runUpload = async (item: PendingUpload) => {
-    patch(item.id, { error: undefined, progress: 0 })
+    patch(item.id, { error: undefined, progress: 0, stage: "upload" })
     try {
-      const url = await uploadImage(item.file, folder, (progress) => patch(item.id, { progress }))
+      let url = await uploadImage(item.file, folder, (progress) => patch(item.id, { progress }))
+      if (whiteBackground && removeBg) {
+        patch(item.id, { stage: "background" })
+        try {
+          url = await makeWhiteBackground(url, folder)
+        } catch (err) {
+          toast.warning(
+            `${err instanceof Error ? err.message : "Couldn't remove the background."} The original photo was kept.`
+          )
+        }
+      }
       const next = multiple ? [...valueRef.current, url] : [url]
       if (!multiple) valueRef.current.forEach((old) => deleteImageByUrl(old))
       valueRef.current = next
@@ -101,6 +137,7 @@ export default function ImageUploader({
       file,
       preview: URL.createObjectURL(file),
       progress: 0,
+      stage: "upload",
       error:
         file.size > MAX_UPLOAD_MB * 1024 * 1024
           ? `Larger than ${MAX_UPLOAD_MB} MB. Choose a smaller photo.`
@@ -139,6 +176,22 @@ export default function ImageUploader({
     onChange(next)
   }
 
+  // Turn an already-uploaded photo's background white.
+  const whiten = async (url: string) => {
+    setConverting((c) => [...c, url])
+    try {
+      const newUrl = await makeWhiteBackground(url, folder)
+      const next = valueRef.current.map((u) => (u === url ? newUrl : u))
+      valueRef.current = next
+      onChange(next)
+      toast.success("Background changed to white. Remember to save.")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't remove the background.")
+    } finally {
+      setConverting((c) => c.filter((u) => u !== url))
+    }
+  }
+
   const makeCover = (index: number) => {
     if (index === 0) return
     const next = [...value]
@@ -167,6 +220,25 @@ export default function ImageUploader({
           {value.map((url, i) => (
             <li key={url} className="group relative aspect-square rounded-lg overflow-hidden bg-foreground/5 ring-1 ring-foreground/10">
               <img src={optimizedImage(url, 300)} alt="" className="h-full w-full object-cover" />
+
+              {converting.includes(url) && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1.5 bg-white/80 text-center">
+                  <Loader2 size={18} className="animate-spin text-teal" />
+                  <span className="px-1 font-body text-[11px] font-semibold text-teal">Making background white…</span>
+                </div>
+              )}
+
+              {whiteBackground && !converting.includes(url) && (
+                <button
+                  type="button"
+                  onClick={() => whiten(url)}
+                  aria-label="Make background white"
+                  title="Make background white"
+                  className="absolute right-1.5 top-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/65 text-white hover:bg-teal"
+                >
+                  <Sparkles size={13} />
+                </button>
+              )}
 
               {multiple && i === 0 && value.length > 1 && (
                 <span className="absolute left-1.5 top-1.5 rounded bg-saffron px-1.5 py-0.5 font-body text-[10px] font-bold text-ink">
@@ -253,14 +325,35 @@ export default function ImageUploader({
                       style={{ width: `${Math.max(p.progress, 5)}%` }}
                     />
                   </div>
-                  <span className="font-body text-[11px] font-medium text-white drop-shadow">
-                    {p.progress < 100 ? `${p.progress}%` : "Finishing…"}
+                  <span className="px-1 text-center font-body text-[11px] font-medium text-white drop-shadow">
+                    {p.stage === "background"
+                      ? "Making background white…"
+                      : p.progress < 100
+                        ? `${p.progress}%`
+                        : "Finishing…"}
                   </span>
                 </div>
               )}
             </li>
           ))}
         </ul>
+      )}
+
+      {whiteBackground && (
+        <label className="flex cursor-pointer items-start gap-2.5 font-body text-sm">
+          <input
+            type="checkbox"
+            checked={removeBg}
+            onChange={(e) => toggleRemoveBg(e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-[hsl(182_69%_18%)]"
+          />
+          <span>
+            <span className="font-semibold">Make background white automatically</span>
+            <span className="block text-xs text-foreground/55">
+              Removes the table and surroundings so the dish stands out. Takes a few extra seconds per photo.
+            </span>
+          </span>
+        </label>
       )}
 
       {showDropZone && (

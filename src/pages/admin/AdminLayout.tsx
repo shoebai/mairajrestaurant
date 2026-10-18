@@ -15,6 +15,7 @@ import {
   ExternalLink,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth"
+import { isDeveloper } from "@/lib/config"
 import logo from "@/assets/mairaj-logo.jpeg"
 
 const links = [
@@ -68,6 +69,7 @@ export default function AdminLayout() {
         })}
 
         <div className="mt-auto pt-4">
+          {isDeveloper(user?.email) && (
           <Link
             to="/admin/seed"
             className={`flex items-center gap-3 rounded-md px-3 py-2 font-body text-sm transition-colors ${
@@ -77,6 +79,7 @@ export default function AdminLayout() {
             <Database size={16} />
             Import menu
           </Link>
+          )}
           <a
             href={import.meta.env.BASE_URL}
             target="_blank"

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { Navigate } from "react-router"
 import { toast } from "sonner"
 import { CheckCircle2, Copy, Loader2, PackagePlus } from "lucide-react"
 import { menu as starterMenu } from "@/lib/menuData"
@@ -12,6 +13,8 @@ import {
   type MenuItem,
 } from "@/lib/firestoreMenu"
 import { PageHeader, PrimaryButton } from "@/components/admin/AdminUI"
+import { useAuth } from "@/lib/auth"
+import { isDeveloper } from "@/lib/config"
 
 /** Which copy of a duplicated dish to keep: the one with the most work in it. */
 function score(item: MenuItem) {
@@ -25,6 +28,13 @@ function score(item: MenuItem) {
 }
 
 export default function AdminSeed() {
+  const { user } = useAuth()
+  if (!isDeveloper(user?.email)) return <Navigate to="/admin" replace />
+  return <ImportMenu />
+}
+
+/** Developer-only: copy the menu saved in the code into the database. */
+function ImportMenu() {
   const { items, loading } = useMenuItems()
   const { keys: deletedKeys, loading: logLoading } = useDeletedDishKeys()
   const [busy, setBusy] = useState<"" | "import" | "dedupe">("")

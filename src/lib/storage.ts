@@ -78,6 +78,10 @@ export async function uploadImage(
   const body = await compressImage(file)
   const form = new FormData()
   form.append("file", body, file.name)
+  return send(form, folder, onProgress)
+}
+
+function send(form: FormData, folder: string, onProgress?: (percent: number) => void): Promise<string> {
   form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET)
   form.append("folder", `mairaj/${folder}`)
 
@@ -137,4 +141,81 @@ export function optimizedImage(url: string | undefined, width: number): string {
   if (!url) return ""
   if (!url.includes("res.cloudinary.com") || !url.includes("/image/upload/")) return url
   return url.replace("/image/upload/", `/image/upload/f_auto,q_auto,c_limit,w_${width}/`)
+}
+
+// ── Automatic white background ─────────────────────────────────────────
+// Uses Cloudinary's AI background removal, then fills the background with
+// white. The result is saved as a new photo, so the (costly) removal runs
+// only once per photo; afterwards it's served like any other image.
+//
+// Cost: each removal counts as 75 transformations. The free plan includes
+// about 25,000 per month, which is plenty for a restaurant menu.
+
+const WHITE_BG = "e_background_removal/b_white,f_jpg,q_90"
+
+/** Finds the Cloudinary public ID inside a delivery URL. */
+function publicIdOf(url: string): string | null {
+  const m = url.match(/\/image\/upload\/(?:v\d+\/)?([^?#]+?)\.[a-z0-9]+(?:[?#].*)?$/i)
+  return m ? m[1] : null
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+const loadsAsImage = (url: string) =>
+  new Promise<boolean>((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve(true)
+    img.onerror = () => resolve(false)
+    img.src = `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`
+  })
+
+/**
+ * Background removal takes a few seconds. Until it's finished, Cloudinary
+ * answers with "processing" (420/423). Keep asking until the image is ready.
+ */
+async function waitUntilReady(url: string, timeoutMs = 90_000) {
+  const start = Date.now()
+  while (Date.now() - start < timeoutMs) {
+    let status = 0
+    try {
+      const res = await fetch(url, { cache: "no-store" })
+      status = res.status
+      if (res.ok) return
+    } catch {
+      // Couldn't read the response (network hiccup or browser privacy
+      // rules); check by loading it as a normal image instead.
+      if (await loadsAsImage(url)) return
+    }
+    if (status && status !== 420 && status !== 423 && status < 500) {
+      throw new Error(
+        status === 401 || status === 403
+          ? "Background removal isn't available on this Cloudinary account."
+          : `Background removal failed (error ${status}).`
+      )
+    }
+    await sleep(2500)
+  }
+  throw new Error("Background removal is taking too long. Try again in a minute.")
+}
+
+/**
+ * Takes an uploaded photo and returns the URL of a copy with the background
+ * replaced by white. The original is removed if it was uploaded in the last
+ * 10 minutes from this browser.
+ */
+export async function makeWhiteBackground(url: string, folder: string): Promise<string> {
+  if (!isStorageConfigured) throw new Error("Photo uploads aren't set up yet.")
+  const publicId = url.includes("res.cloudinary.com") ? publicIdOf(url) : null
+  if (!publicId) throw new Error("Only photos uploaded through this admin panel can be changed.")
+
+  const processed = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${WHITE_BG}/${publicId}.jpg`
+  await waitUntilReady(processed)
+
+  // Save the finished image as its own photo (uploading from a URL).
+  const form = new FormData()
+  form.append("file", processed)
+  const newUrl = await send(form, folder)
+
+  deleteImageByUrl(url)
+  return newUrl
 }

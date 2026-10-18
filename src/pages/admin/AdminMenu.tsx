@@ -263,7 +263,7 @@ export default function AdminMenu() {
           ))}
           {items.length === 0 && (
             <li className="rounded-lg border border-dashed border-foreground/20 py-12 text-center font-body text-foreground/60">
-              No dishes yet. Add your first one, or use “Import menu” to load the original menu.
+              No dishes yet. Tap “Add dish” to add your first one.
             </li>
           )}
           {items.length > 0 && visible.length === 0 && (
@@ -295,7 +295,8 @@ export default function AdminMenu() {
               onChange={(images) => setForm((f) => ({ ...f, images }))}
               folder="menu-items"
               onBusyChange={onBusyChange}
-              hint="The first photo is shown on the menu. Add more and guests can swipe through them."
+              whiteBackground
+              hint="The first photo is shown on the menu. Tap the sparkle button on a photo to make its background white later."
             />
           </Field>
 
