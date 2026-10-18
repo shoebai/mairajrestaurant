@@ -150,6 +150,11 @@ export function useT() {
   return (key: keyof typeof dict) => dict[key]?.[lang] ?? key
 }
 
+/** Built-in text for a key in a specific language (used by the admin panel). */
+export function translate(key: keyof typeof dict, lang: Lang) {
+  return dict[key]?.[lang] ?? ""
+}
+
 interface LanguageContextValue {
   lang: Lang
   toggleLang: () => void

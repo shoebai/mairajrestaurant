@@ -65,6 +65,18 @@ export default function Navbar() {
   // The bar is always peacock teal; it just gets slimmer once you scroll.
   const compact = scrolled || open
 
+  // A link to the section you're already on doesn't change the URL, so
+  // React Router won't scroll. Scroll to it ourselves in that case.
+  const onSectionClick = (to: string) => {
+    const hashIndex = to.indexOf("#")
+    if (hashIndex === -1) return
+    const hash = to.slice(hashIndex)
+    if (location.pathname === "/" && location.hash === hash) {
+      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" })
+      setOpen(false)
+    }
+  }
+
   const isActive = (to: string) => {
     if (to.includes("#")) return location.pathname === "/" && location.hash === to.slice(1)
     return location.pathname === to && !(to === "/" && location.hash)
@@ -105,6 +117,7 @@ export default function Navbar() {
                 <li key={link.to}>
                   <Link
                     to={link.to}
+                    onClick={() => onSectionClick(link.to)}
                     aria-current={active ? "page" : undefined}
                     className={`group relative block px-4 py-2 font-body text-[15px] font-medium transition-colors duration-300 ${
                       active ? "text-saffron" : "text-cream/90 hover:text-cream"
@@ -133,6 +146,7 @@ export default function Navbar() {
 
             <Link
               to="/#reservation"
+              onClick={() => onSectionClick("/#reservation")}
               className="hidden rounded-md bg-saffron px-5 py-2.5 font-body text-sm font-bold text-ink transition-colors hover:bg-[hsl(36_80%_63%)] sm:inline-block"
             >
               {t("navReserveTable")}
@@ -197,6 +211,7 @@ export default function Navbar() {
                   <Link
                     ref={i === 0 ? firstLinkRef : undefined}
                     to={link.to}
+                    onClick={() => onSectionClick(link.to)}
                     aria-current={active ? "page" : undefined}
                     className={`flex items-center gap-3 py-2.5 font-display text-4xl transition-colors ${
                       active ? "text-saffron" : "text-cream hover:text-saffron"
@@ -213,6 +228,7 @@ export default function Navbar() {
           <div className="flex flex-col gap-4 border-t border-cream/10 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6">
             <Link
               to="/#reservation"
+              onClick={() => onSectionClick("/#reservation")}
               className="rounded-md bg-saffron py-3 text-center font-body text-base font-bold text-ink hover:bg-[hsl(36_80%_63%)]"
             >
               {t("navReserveTable")}

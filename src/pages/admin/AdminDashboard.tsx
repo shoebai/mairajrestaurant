@@ -40,10 +40,10 @@ export default function AdminDashboard() {
     },
     {
       to: "/admin/homepage",
-      label: "Homepage photos",
+      label: "Homepage",
       icon: ImageIcon,
       value: hero.images.length ? `${hero.images.length} photos` : "Default photos",
-      detail: "The big slideshow at the top",
+      detail: "Slideshow photos and headings",
     },
     {
       to: "/admin/about",

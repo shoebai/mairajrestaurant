@@ -1,9 +1,13 @@
 import { useReveal } from "@/hooks/useReveal"
-import { useT } from "@/lib/i18n"
+import { useT, useLanguage } from "@/lib/i18n"
+import { useHomeText } from "@/lib/firestoreSite"
 
 export default function Story() {
   const ref = useReveal<HTMLDivElement>()
   const t = useT()
+  const { lang } = useLanguage()
+  const { get } = useHomeText()
+  const customTitle = get("storyTitle", lang)
 
   return (
     <section id="story" className="bg-cream py-24 md:py-32">
@@ -12,11 +16,15 @@ export default function Story() {
           <path d="M4 38V20C4 10 16 3 32 3s28 7 28 17v18" />
           <path d="M16 38V24c0-6 7-10 16-10s16 4 16 10v14" />
         </svg>
-        <p className="font-body text-xs font-bold uppercase tracking-[0.2em] text-gold">{t("storyEyebrow")}</p>
-        <h2 className="font-display text-4xl leading-tight md:text-5xl">
-          {t("storyTitle")} <span className="text-teal">{t("storyTitleEmphasis")}</span>
+        <p className="font-body text-xs font-bold uppercase tracking-[0.2em] text-gold">{get("storyEyebrow", lang) || t("storyEyebrow")}</p>
+        <h2 className="whitespace-pre-line font-display text-4xl leading-tight md:text-5xl">
+          {customTitle || (
+            <>
+              {t("storyTitle")} <span className="text-teal">{t("storyTitleEmphasis")}</span>
+            </>
+          )}
         </h2>
-        <p className="max-w-2xl font-body text-lg leading-relaxed text-foreground/75">{t("storyBody")}</p>
+        <p className="max-w-2xl whitespace-pre-line font-body text-lg leading-relaxed text-foreground/75">{get("storyBody", lang) || t("storyBody")}</p>
       </div>
     </section>
   )

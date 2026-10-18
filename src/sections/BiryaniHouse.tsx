@@ -1,6 +1,7 @@
 import { useReveal } from "@/hooks/useReveal"
 import { useMenuItems } from "@/lib/firestoreMenu"
 import { useT, useLanguage } from "@/lib/i18n"
+import { useHomeText } from "@/lib/firestoreSite"
 
 /** Lists every dish with "biryani" in its name, straight from Admin → Menu. */
 export default function BiryaniHouse() {
@@ -8,6 +9,7 @@ export default function BiryaniHouse() {
   const t = useT()
   const { lang } = useLanguage()
   const { items } = useMenuItems()
+  const { get } = useHomeText()
 
   const biryanis = items.filter((i) => /biryani|برياني/i.test(`${i.name} ${i.nameAr ?? ""}`)).slice(0, 8)
   if (biryanis.length === 0) return null
@@ -17,8 +19,8 @@ export default function BiryaniHouse() {
       <div ref={ref} className="reveal mx-auto flex max-w-6xl flex-col gap-12 px-6 py-24 md:flex-row md:gap-16 md:py-28">
         <div className="flex flex-col gap-4 md:w-2/5">
           <p className="font-body text-xs font-bold uppercase tracking-[0.2em] text-gold">{t("biryaniEyebrow")}</p>
-          <h2 className="font-display text-4xl leading-tight md:text-6xl">{t("biryaniTitle")}</h2>
-          <p className="max-w-sm font-body text-lg leading-relaxed text-foreground/75">{t("biryaniBody")}</p>
+          <h2 className="font-display text-4xl leading-tight md:text-6xl">{get("biryaniTitle", lang) || t("biryaniTitle")}</h2>
+          <p className="max-w-sm font-body text-lg leading-relaxed text-foreground/75">{get("biryaniBody", lang) || t("biryaniBody")}</p>
         </div>
         <ul className="flex-1">
           {biryanis.map((b) => {

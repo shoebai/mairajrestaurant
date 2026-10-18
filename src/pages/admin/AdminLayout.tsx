@@ -22,7 +22,7 @@ const links = [
   { to: "/admin/menu", label: "Menu", icon: UtensilsCrossed },
   { to: "/admin/offers", label: "Offers", icon: Tag },
   { to: "/admin/gallery", label: "Gallery", icon: Images },
-  { to: "/admin/homepage", label: "Homepage photos", icon: ImageIcon },
+  { to: "/admin/homepage", label: "Homepage", icon: ImageIcon },
   { to: "/admin/about", label: "About us", icon: Info },
 ]
 

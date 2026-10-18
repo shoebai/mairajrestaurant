@@ -3,12 +3,14 @@ import { useReveal } from "@/hooks/useReveal"
 import { useMenuItems } from "@/lib/firestoreMenu"
 import { optimizedImage } from "@/lib/storage"
 import { useT, useLanguage } from "@/lib/i18n"
+import { useHomeText } from "@/lib/firestoreSite"
 
 export default function MenuTeaser() {
   const ref = useReveal<HTMLDivElement>()
   const t = useT()
   const { lang } = useLanguage()
   const { items } = useMenuItems()
+  const { get } = useHomeText()
 
   // Starred dishes from Admin → Menu; ones with photos first.
   const featured = items
@@ -25,7 +27,7 @@ export default function MenuTeaser() {
           <p className="font-body text-xs font-bold uppercase tracking-[0.2em] text-gold">
             {t("favouritesEyebrow")}
           </p>
-          <h2 className="font-display text-4xl md:text-6xl">{t("favouritesTitle")}</h2>
+          <h2 className="font-display text-4xl md:text-6xl">{get("favouritesTitle", lang) || t("favouritesTitle")}</h2>
         </div>
 
         <div className="grid gap-x-7 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">

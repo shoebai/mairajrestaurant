@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router"
-import { useT } from "@/lib/i18n"
-import { useHeroSettings } from "@/lib/firestoreSite"
+import { useT, useLanguage } from "@/lib/i18n"
+import { useHeroSettings, useHomeText } from "@/lib/firestoreSite"
 import { optimizedImage } from "@/lib/storage"
 import { RESTAURANT_WHATSAPP } from "@/lib/config"
 import hero1 from "@/assets/hero/hero-1.webp"
@@ -14,6 +14,8 @@ const SLIDE_DURATION = 5000
 
 export default function Hero() {
   const t = useT()
+  const { lang } = useLanguage()
+  const { get } = useHomeText()
   const [active, setActive] = useState(0)
   const { hero, loading } = useHeroSettings()
 
@@ -38,12 +40,12 @@ export default function Hero() {
         {/* Text */}
         <div className="flex flex-1 flex-col gap-6 pb-4 md:pb-24">
           <p className="font-body text-xs font-bold uppercase tracking-[0.2em] text-saffron">
-            {t("heritageEyebrow")}
+            {get("heroEyebrow", lang) || t("heritageEyebrow")}
           </p>
-          <h1 className="font-display text-[2.75rem] leading-[1.04] sm:text-6xl lg:text-[5.25rem]">
-            {t("heritageTitle")}
+          <h1 className="whitespace-pre-line font-display text-[2.75rem] leading-[1.04] sm:text-6xl lg:text-[5.25rem]">
+            {get("heroTitle", lang) || t("heritageTitle")}
           </h1>
-          <p className="max-w-md font-body text-lg leading-relaxed text-cream/80">{t("heritageBody")}</p>
+          <p className="max-w-md whitespace-pre-line font-body text-lg leading-relaxed text-cream/80">{get("heroBody", lang) || t("heritageBody")}</p>
           {secondLine && (
             <p dir="rtl" lang="ar" className="font-arabic text-2xl text-cream md:text-[1.7rem]">
               {secondLine}
