@@ -169,7 +169,7 @@ export default function ImageUploader({
               <img src={optimizedImage(url, 300)} alt="" className="h-full w-full object-cover" />
 
               {multiple && i === 0 && value.length > 1 && (
-                <span className="absolute left-1.5 top-1.5 rounded bg-gold px-1.5 py-0.5 font-body text-[10px] font-medium text-white">
+                <span className="absolute left-1.5 top-1.5 rounded bg-saffron px-1.5 py-0.5 font-body text-[10px] font-bold text-ink">
                   Cover
                 </span>
               )}
@@ -249,7 +249,7 @@ export default function ImageUploader({
                   <Loader2 size={20} className="animate-spin text-white drop-shadow" />
                   <div className="h-1.5 w-3/4 overflow-hidden rounded-full bg-white/50">
                     <div
-                      className="h-full bg-gold transition-[width] duration-200"
+                      className="h-full bg-saffron transition-[width] duration-200"
                       style={{ width: `${Math.max(p.progress, 5)}%` }}
                     />
                   </div>
@@ -285,10 +285,10 @@ export default function ImageUploader({
             addFiles(e.dataTransfer.files)
           }}
           className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-7 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
-            dragging ? "border-gold bg-gold/10" : "border-foreground/20 bg-white hover:border-gold hover:bg-gold/5"
+            dragging ? "border-teal bg-teal/10" : "border-foreground/25 bg-cream/50 hover:border-teal hover:bg-teal/5"
           }`}
         >
-          <ImagePlus size={26} className="text-gold" />
+          <ImagePlus size={26} className="text-teal" />
           <p className="font-body text-sm font-medium">
             {dragging ? "Drop to upload" : multiple ? "Add photos" : "Add a photo"}
           </p>
@@ -303,7 +303,7 @@ export default function ImageUploader({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="w-fit font-body text-sm text-gold underline-offset-4 hover:underline"
+          className="w-fit font-body text-sm font-semibold text-teal underline-offset-4 hover:underline"
         >
           Replace photo
         </button>

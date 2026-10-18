@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Jost:wght@300;400;500;600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700&family=Amiri:wght@400;700&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,26 +6,26 @@
 
 @layer base {
   :root {
-    /* Midnight & Brass palette — refined: true black ink/text */
-    --background: 38 24% 95%;
-    --foreground: 0 0% 0%;
-    --card: 38 20% 93%;
-    --card-foreground: 0 0% 0%;
-    --popover: 38 20% 93%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 42 50% 54%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 30 18% 90%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 30 12% 86%;
-    --muted-foreground: 0 0% 20%;
-    --accent: 20 32% 18%;
-    --accent-foreground: 38 24% 95%;
+    /* Hyderabad Heritage: ivory, peacock teal, saffron */
+    --background: 39 41% 94%;
+    --foreground: 183 22% 14%;
+    --card: 38 33% 97%;
+    --card-foreground: 183 22% 14%;
+    --popover: 38 33% 97%;
+    --popover-foreground: 183 22% 14%;
+    --primary: 182 69% 18%;
+    --primary-foreground: 39 41% 94%;
+    --secondary: 38 33% 89%;
+    --secondary-foreground: 183 22% 14%;
+    --muted: 38 25% 86%;
+    --muted-foreground: 183 10% 33%;
+    --accent: 182 69% 18%;
+    --accent-foreground: 39 41% 94%;
     --destructive: 0 62.8% 45%;
     --destructive-foreground: 0 0% 98%;
-    --border: 30 14% 80%;
-    --input: 30 14% 80%;
-    --ring: 42 50% 54%;
+    --border: 37 25% 80%;
+    --input: 37 25% 80%;
+    --ring: 31 79% 36%;
     --radius: 0.25rem;
   }
 }
@@ -59,41 +59,40 @@
     font-family: 'Noto Kufi Arabic', system-ui, sans-serif;
   }
   html[dir="rtl"] .font-display {
-    font-family: 'Noto Kufi Arabic', system-ui, sans-serif;
+    font-family: 'Amiri', 'Noto Kufi Arabic', serif;
     font-style: normal !important;
   }
 }
 
 @layer utilities {
   .font-display {
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: 'Marcellus', Georgia, serif;
+    font-weight: 400;
   }
   .font-body {
-    font-family: 'Jost', system-ui, sans-serif;
+    font-family: 'Figtree', system-ui, sans-serif;
+  }
+  .font-arabic {
+    font-family: 'Amiri', 'Noto Kufi Arabic', serif;
+  }
+  /* Charminar-style arch for photo frames */
+  .arch {
+    border-radius: 999px 999px 0.5rem 0.5rem;
   }
   .tracking-mega {
-    letter-spacing: 0.35em;
+    letter-spacing: 0.2em;
+    font-weight: 700;
   }
   html[dir="rtl"] .tracking-mega {
     letter-spacing: 0.05em;
   }
-  .text-gold {
-    color: hsl(42 50% 54%);
-  }
-  .bg-gold {
-    background-color: hsl(42 50% 54%);
-  }
-  .border-gold {
-    border-color: hsl(42 50% 54%);
-  }
-  .text-brown {
-    color: hsl(20 32% 18%);
-  }
-  .bg-brown {
-    background-color: hsl(20 32% 18%);
-  }
-  .border-brown {
-    border-color: hsl(20 32% 18%);
+  /* On dark (teal / ink) backgrounds, "gold" text switches to a light saffron
+     so it stays readable. */
+  .bg-teal .text-gold,
+  .bg-brown .text-gold,
+  .bg-foreground .text-gold,
+  .bg-ink .text-gold {
+    color: hsl(37 74% 66%);
   }
   .reveal {
     opacity: 0;
@@ -107,7 +106,7 @@
   }
   .menu-dots {
     flex: 1;
-    border-bottom: 1px dotted hsl(30 10% 60%);
+    border-bottom: 2px dotted hsl(37 18% 66%);
     margin: 0 0.75rem;
     transform: translateY(-4px);
   }
@@ -117,15 +116,15 @@
     border: 1px solid hsl(var(--border));
     border-radius: 0.375rem;
     padding: 0.625rem 0.75rem;
-    font-family: 'Jost', system-ui, sans-serif;
+    font-family: 'Figtree', system-ui, sans-serif;
     /* 16px stops iPhones from zooming in when a field is tapped */
     font-size: 1rem;
     outline: none;
     transition: border-color 150ms, box-shadow 150ms;
   }
   .admin-input:focus {
-    border-color: hsl(42 50% 54%);
-    box-shadow: 0 0 0 3px hsl(42 50% 54% / 0.2);
+    border-color: hsl(182 69% 18%);
+    box-shadow: 0 0 0 3px hsl(182 69% 18% / 0.15);
   }
   html[dir="rtl"] .admin-input,
   .admin-input[dir="rtl"] {

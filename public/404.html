@@ -1,4 +1,3 @@
-@'
 <!doctype html>
 <html lang="en">
   <head>
@@ -6,9 +5,9 @@
     <title>Mairaj Restaurant</title>
     <script type="text/javascript">
       // Single Page App redirect for GitHub Pages.
-      // On the custom domain (mairajhyd.com) the site lives at the root: keep 0 segments.
-      // On username.github.io/repo it lives in a folder: keep 1 segment.
-      var pathSegmentsToKeep = /\.github\.io$/.test(window.location.hostname) ? 1 : 0;
+      // Saves the path the visitor actually wanted, then bounces to index.html
+      // so React Router can pick it back up.
+      var pathSegmentsToKeep = /\.github\.io$/.test(window.location.hostname) ? 1 : 0; // 0 on mairajhyd.com, 1 on username.github.io/repo
       var l = window.location;
       l.replace(
         l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
@@ -21,4 +20,3 @@
   </head>
   <body></body>
 </html>
-'@ | Set-Content -Path public\404.html -Encoding utf8

@@ -7,6 +7,7 @@ import {
   addMenuItem,
   updateMenuItem,
   deleteMenuItem,
+  rememberDeletedDish,
   type MenuItem,
 } from "@/lib/firestoreMenu"
 import { optimizedImage } from "@/lib/storage"
@@ -137,6 +138,10 @@ export default function AdminMenu() {
     if (!confirm(`Delete "${item.name}" from the menu? This can't be undone.`)) return
     try {
       await deleteMenuItem(item.id)
+      // Only remember it if no other copy of this dish is left.
+      if (!items.some((i) => i.id !== item.id && i.name === item.name)) {
+        rememberDeletedDish(item.name).catch(() => {})
+      }
       toast.success(`Deleted "${item.name}"`)
     } catch {
       toast.error("Couldn't delete. Check your connection and try again.")
@@ -258,7 +263,7 @@ export default function AdminMenu() {
           ))}
           {items.length === 0 && (
             <li className="rounded-lg border border-dashed border-foreground/20 py-12 text-center font-body text-foreground/60">
-              No dishes yet. Add your first one, or use “Import starter menu” to load the existing menu.
+              No dishes yet. Add your first one, or use “Import menu” to load the original menu.
             </li>
           )}
           {items.length > 0 && visible.length === 0 && (

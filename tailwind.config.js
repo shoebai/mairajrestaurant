@@ -10,9 +10,14 @@ module.exports = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        cream: "hsl(38 24% 95%)",
-        gold: "hsl(42 50% 54%)",
-        brown: "hsl(20 32% 18%)",
+        // "Hyderabad Heritage" palette
+        cream: "hsl(39 41% 94%)", // ivory page background  #F6F1E8
+        gold: "hsl(31 79% 36%)", // deep saffron for text & buttons on light backgrounds  #A65F14
+        brown: "hsl(182 69% 18%)", // kept as an alias of teal for older classes
+        teal: "hsl(182 69% 18%)", // peacock teal  #0E4D4F
+        saffron: "hsl(36 80% 57%)", // bright saffron for buttons on teal  #E9A23B
+        sand: "hsl(38 33% 89%)", // soft section background  #EDE5D7
+        ink: "hsl(183 22% 14%)", // text  #1B2A2B
         "english-blue": "hsl(210 45% 35%)",
         primary: {
           DEFAULT: "hsl(var(--primary))",

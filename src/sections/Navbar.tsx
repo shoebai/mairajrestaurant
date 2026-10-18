@@ -28,6 +28,18 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
+  // Share the bar's height (as --nav-h) so sticky bars below it line up.
+  const headerRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const el = headerRef.current
+    if (!el || typeof ResizeObserver === "undefined") return
+    const ro = new ResizeObserver(() =>
+      document.documentElement.style.setProperty("--nav-h", `${el.offsetHeight}px`)
+    )
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   // Close the phone menu whenever the page or section changes.
   useEffect(() => setOpen(false), [location.pathname, location.hash])
 
@@ -50,8 +62,8 @@ export default function Navbar() {
     }
   }, [open])
 
-  // Only the homepage has a photo behind the bar; elsewhere it is always solid.
-  const overPhoto = location.pathname === "/" && !scrolled && !open
+  // The bar is always peacock teal; it just gets slimmer once you scroll.
+  const compact = scrolled || open
 
   const isActive = (to: string) => {
     if (to.includes("#")) return location.pathname === "/" && location.hash === to.slice(1)
@@ -61,10 +73,9 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,padding] duration-300 ${
-          overPhoto
-            ? "bg-gradient-to-b from-black/50 to-transparent py-5"
-            : "bg-cream/95 py-3 shadow-[0_1px_0_hsl(42_50%_54%/0.25)] backdrop-blur-md"
+        ref={headerRef}
+        className={`fixed inset-x-0 top-0 z-50 bg-teal transition-[box-shadow,padding] duration-300 ${
+          compact ? "py-2.5 shadow-[0_6px_24px_rgba(14,77,79,0.25)]" : "py-4"
         }`}
       >
         <nav className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 md:px-6">
@@ -72,19 +83,17 @@ export default function Navbar() {
             <img
               src={logo}
               alt=""
-              className={`rounded-full object-cover ring-1 ring-gold/50 transition-all duration-300 ${
-                overPhoto ? "h-12 w-12" : "h-10 w-10"
+              className={`rounded-full object-cover ring-2 ring-saffron transition-all duration-300 ${
+                compact ? "h-10 w-10" : "h-12 w-12"
               }`}
             />
             <span className="leading-none">
               <span
-                className={`block font-display text-2xl transition-colors duration-300 md:text-[1.7rem] ${
-                  overPhoto ? "text-cream" : "text-foreground"
-                }`}
+                className="block font-display text-2xl text-cream md:text-[1.7rem]"
               >
                 Mairaj
               </span>
-              <span className="mt-1 block font-body text-[0.7rem] text-gold">{t("brandTagline")}</span>
+              <span className="mt-1 block font-arabic text-[0.95rem] leading-none text-saffron">{t("brandArabic")}</span>
             </span>
           </Link>
 
@@ -97,17 +106,13 @@ export default function Navbar() {
                   <Link
                     to={link.to}
                     aria-current={active ? "page" : undefined}
-                    className={`group relative block px-4 py-2 font-body text-[15px] transition-colors duration-300 ${
-                      active
-                        ? "text-gold"
-                        : overPhoto
-                          ? "text-cream/90 hover:text-cream"
-                          : "text-foreground/75 hover:text-foreground"
+                    className={`group relative block px-4 py-2 font-body text-[15px] font-medium transition-colors duration-300 ${
+                      active ? "text-saffron" : "text-cream/90 hover:text-cream"
                     }`}
                   >
                     {link.label}
                     <span
-                      className={`absolute inset-x-4 -bottom-0.5 h-px origin-center bg-gold transition-transform duration-300 ${
+                      className={`absolute inset-x-4 -bottom-0.5 h-0.5 origin-center bg-saffron transition-transform duration-300 ${
                         active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                       }`}
                     />
@@ -121,18 +126,14 @@ export default function Navbar() {
             <button
               onClick={toggleLang}
               aria-label={lang === "en" ? "التبديل إلى العربية" : "Switch to English"}
-              className={`rounded-full border px-3 py-1.5 font-body text-sm transition-colors duration-300 ${
-                overPhoto
-                  ? "border-cream/30 text-cream hover:border-gold hover:text-gold"
-                  : "border-foreground/15 text-foreground/80 hover:border-gold hover:text-gold"
-              }`}
+              className="rounded-md border border-cream/35 px-3 py-1.5 font-body text-sm text-cream transition-colors hover:border-saffron hover:text-saffron"
             >
               {lang === "en" ? "عربي" : "EN"}
             </button>
 
             <Link
               to="/#reservation"
-              className="hidden rounded-full bg-gold px-5 py-2 font-body text-sm font-medium text-white transition-colors hover:bg-[hsl(42_50%_46%)] sm:inline-block"
+              className="hidden rounded-md bg-saffron px-5 py-2.5 font-body text-sm font-bold text-ink transition-colors hover:bg-[hsl(36_80%_63%)] sm:inline-block"
             >
               {t("navReserveTable")}
             </Link>
@@ -143,9 +144,7 @@ export default function Navbar() {
               aria-label={open ? t("navCloseMenu") : t("navOpenMenu")}
               aria-expanded={open}
               aria-controls="mobile-menu"
-              className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors lg:hidden ${
-                overPhoto ? "text-cream hover:bg-white/10" : "text-foreground hover:bg-foreground/5"
-              }`}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-cream transition-colors hover:bg-white/10 lg:hidden"
             >
               <span className="sr-only">{open ? t("navCloseMenu") : t("navOpenMenu")}</span>
               <span aria-hidden className="relative block h-3.5 w-5">
@@ -176,7 +175,7 @@ export default function Navbar() {
           }`}
         >
           <div className="flex items-center justify-between px-6 pb-2 pt-5">
-            <img src={logo} alt="" className="h-11 w-11 rounded-full object-cover ring-1 ring-gold/50" />
+            <img src={logo} alt="" className="h-11 w-11 rounded-full object-cover ring-2 ring-saffron" />
             <button
               onClick={() => setOpen(false)}
               aria-label={t("navCloseMenu")}
@@ -200,10 +199,10 @@ export default function Navbar() {
                     to={link.to}
                     aria-current={active ? "page" : undefined}
                     className={`flex items-center gap-3 py-2.5 font-display text-4xl transition-colors ${
-                      active ? "text-gold" : "text-cream hover:text-gold"
+                      active ? "text-saffron" : "text-cream hover:text-saffron"
                     }`}
                   >
-                    <span className={`h-px bg-gold transition-all ${active ? "w-6" : "w-0"}`} />
+                    <span className={`h-0.5 bg-saffron transition-all ${active ? "w-6" : "w-0"}`} />
                     {link.label}
                   </Link>
                 </li>
@@ -214,7 +213,7 @@ export default function Navbar() {
           <div className="flex flex-col gap-4 border-t border-cream/10 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6">
             <Link
               to="/#reservation"
-              className="rounded-full bg-gold py-3 text-center font-body text-base font-medium text-white hover:bg-[hsl(42_50%_46%)]"
+              className="rounded-md bg-saffron py-3 text-center font-body text-base font-bold text-ink hover:bg-[hsl(36_80%_63%)]"
             >
               {t("navReserveTable")}
             </Link>
@@ -247,7 +246,7 @@ function QuickAction({
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
-      className="flex flex-col items-center gap-1.5 rounded-xl border border-cream/15 py-3 font-body text-xs text-cream/85 transition-colors hover:border-gold hover:text-gold"
+      className="flex flex-col items-center gap-1.5 rounded-lg border border-cream/15 py-3 font-body text-xs text-cream/85 transition-colors hover:border-saffron hover:text-saffron"
     >
       {icon}
       {label}

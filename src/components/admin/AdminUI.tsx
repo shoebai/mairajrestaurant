@@ -52,7 +52,7 @@ export function PrimaryButton({
   return (
     <button
       {...props}
-      className={`inline-flex items-center justify-center gap-2 rounded-md bg-gold px-5 py-2.5 font-body text-sm font-medium text-white transition-colors hover:bg-[hsl(42_50%_46%)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-md bg-teal px-5 py-2.5 font-body text-sm font-bold text-cream transition-colors hover:bg-[hsl(182_69%_24%)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-saffron disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
     >
       {children}
     </button>
@@ -100,7 +100,7 @@ export function AdminModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/55 sm:items-center sm:p-6"
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-ink/45 sm:items-stretch sm:justify-end"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) requestClose()
       }}
@@ -109,10 +109,10 @@ export function AdminModal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-cream shadow-2xl sm:max-w-2xl sm:rounded-xl"
+        className="flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-white shadow-2xl sm:h-full sm:max-h-none sm:max-w-xl sm:rounded-none sm:border-l sm:border-foreground/10"
       >
-        <div className="flex items-center justify-between border-b border-foreground/10 px-5 py-4 sm:px-6">
-          <h2 className="font-display text-2xl">{title}</h2>
+        <div className="flex items-center justify-between border-b border-foreground/10 px-5 py-4 sm:px-7 sm:py-5">
+          <h2 className="font-display text-[1.75rem]">{title}</h2>
           <button
             type="button"
             onClick={requestClose}
@@ -122,10 +122,10 @@ export function AdminModal({
             <X size={20} />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+        <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-7">
           <div className="flex flex-col gap-5">{children}</div>
         </div>
-        <div className="flex items-center justify-end gap-3 border-t border-foreground/10 bg-cream px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:rounded-b-xl sm:px-6">
+        <div className="flex items-center justify-end gap-3 border-t border-foreground/10 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-7">
           <button
             type="button"
             onClick={requestClose}
@@ -152,14 +152,14 @@ export function Toggle({
   description?: string
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-foreground/10 bg-white p-3.5">
+    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-foreground/10 bg-cream/60 p-3.5">
       <button
         type="button"
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
-          checked ? "bg-gold" : "bg-foreground/20"
+        className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-saffron ${
+          checked ? "bg-teal" : "bg-foreground/20"
         }`}
       >
         <span

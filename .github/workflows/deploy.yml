@@ -37,6 +37,15 @@ jobs:
           VITE_CLOUDINARY_CLOUD_NAME: ${{ vars.VITE_CLOUDINARY_CLOUD_NAME }}
           VITE_CLOUDINARY_UPLOAD_PRESET: ${{ vars.VITE_CLOUDINARY_UPLOAD_PRESET }}
 
+      # Give each page its own index.html so Google sees /menu and /about as
+      # real pages (status 200) instead of "not found" redirects.
+      - name: Create page entry points
+        run: |
+          for page in menu about; do
+            mkdir -p dist/$page
+            cp dist/index.html dist/$page/index.html
+          done
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

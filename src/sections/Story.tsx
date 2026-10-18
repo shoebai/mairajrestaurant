@@ -6,35 +6,17 @@ export default function Story() {
   const t = useT()
 
   return (
-    <section className="py-24 md:py-32 bg-cream">
-      <div ref={ref} className="reveal max-w-4xl mx-auto px-6 text-center">
-        <p className="font-body text-[0.65rem] tracking-mega uppercase text-gold mb-5">
-          {t("storyEyebrow")}
-        </p>
-        <h2 className="font-display text-4xl md:text-5xl leading-tight mb-8">
-          {t("storyTitle")}
-          <span className="text-brown italic"> {t("storyTitleEmphasis")}</span>
+    <section id="story" className="bg-cream py-24 md:py-32">
+      <div ref={ref} className="reveal mx-auto flex max-w-4xl flex-col items-center gap-6 px-6 text-center">
+        <svg aria-hidden="true" width="64" height="40" viewBox="0 0 64 40" fill="none" className="text-gold" stroke="currentColor" strokeWidth="2">
+          <path d="M4 38V20C4 10 16 3 32 3s28 7 28 17v18" />
+          <path d="M16 38V24c0-6 7-10 16-10s16 4 16 10v14" />
+        </svg>
+        <p className="font-body text-xs font-bold uppercase tracking-[0.2em] text-gold">{t("storyEyebrow")}</p>
+        <h2 className="font-display text-4xl leading-tight md:text-5xl">
+          {t("storyTitle")} <span className="text-teal">{t("storyTitleEmphasis")}</span>
         </h2>
-        <p className="font-body text-foreground/70 text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
-          {t("storyBody")}
-        </p>
-
-        <div className="grid grid-cols-3 gap-6 md:gap-12 mt-16 max-w-xl mx-auto">
-          {[
-            { value: "1", label: t("statBranches") },
-            { value: "40+", label: t("statDishes") },
-            { value: "100%", label: t("statFresh") },
-          ].map((stat) => (
-            <div key={stat.label}>
-              <div className="font-display text-3xl md:text-4xl text-gold">
-                {stat.value}
-              </div>
-              <div className="font-body text-[0.65rem] tracking-widest uppercase text-foreground/50 mt-2">
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
+        <p className="max-w-2xl font-body text-lg leading-relaxed text-foreground/75">{t("storyBody")}</p>
       </div>
     </section>
   )

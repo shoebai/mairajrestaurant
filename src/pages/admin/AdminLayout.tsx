@@ -41,10 +41,10 @@ export default function AdminLayout() {
   const sidebar = (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-cream/10 p-5">
-        <img src={logo} alt="" className="h-10 w-10 rounded-full object-cover" />
+        <img src={logo} alt="" className="h-10 w-10 rounded-full object-cover ring-2 ring-saffron" />
         <div>
           <p className="font-display text-lg leading-tight">Mairaj</p>
-          <p className="font-body text-xs text-gold">Website admin</p>
+          <p className="font-body text-xs text-saffron">Website admin</p>
         </div>
       </div>
 
@@ -58,7 +58,7 @@ export default function AdminLayout() {
               to={link.to}
               aria-current={active ? "page" : undefined}
               className={`flex items-center gap-3 rounded-md px-3 py-2.5 font-body text-[15px] transition-colors ${
-                active ? "bg-gold text-white" : "text-cream/75 hover:bg-cream/10 hover:text-cream"
+                active ? "bg-saffron font-semibold text-ink" : "text-cream/80 hover:bg-cream/10 hover:text-cream"
               }`}
             >
               <Icon size={18} />
@@ -75,7 +75,7 @@ export default function AdminLayout() {
             }`}
           >
             <Database size={16} />
-            Import starter menu
+            Import menu
           </Link>
           <a
             href={import.meta.env.BASE_URL}
@@ -93,7 +93,7 @@ export default function AdminLayout() {
         <p className="mb-2 truncate font-body text-xs text-cream/45">{user?.email}</p>
         <button
           onClick={() => logout()}
-          className="flex items-center gap-2 font-body text-sm text-cream/75 transition-colors hover:text-gold"
+          className="flex items-center gap-2 font-body text-sm text-cream/75 transition-colors hover:text-saffron"
         >
           <LogOut size={16} /> Sign out
         </button>
@@ -102,14 +102,14 @@ export default function AdminLayout() {
   )
 
   return (
-    <div className="min-h-screen bg-[hsl(38_24%_97%)] md:flex">
+    <div className="min-h-screen bg-cream md:flex">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 bg-foreground text-cream md:block">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 bg-teal text-cream md:block">
         {sidebar}
       </aside>
 
       {/* Phone top bar */}
-      <header className="sticky top-0 z-40 flex items-center justify-between bg-foreground px-4 py-3 text-cream md:hidden">
+      <header className="sticky top-0 z-40 flex items-center justify-between bg-teal px-4 py-3 text-cream md:hidden">
         <button
           onClick={() => setDrawerOpen(true)}
           aria-label="Open admin menu"
@@ -125,7 +125,7 @@ export default function AdminLayout() {
       {drawerOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setDrawerOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] bg-foreground text-cream shadow-2xl">
+          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] bg-teal text-cream shadow-2xl">
             <button
               onClick={() => setDrawerOpen(false)}
               aria-label="Close admin menu"

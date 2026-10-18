@@ -28,7 +28,7 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-foreground flex items-center justify-center px-6">
+    <div className="min-h-screen bg-teal flex items-center justify-center px-6">
       <div className="max-w-sm w-full">
         <div className="flex flex-col items-center mb-8">
           <img src={logo} alt="Mairaj" className="w-16 h-16 rounded-full object-cover mb-4" />
@@ -45,7 +45,7 @@ export default function AdminLogin() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-transparent border border-cream/20 focus:border-gold outline-none rounded-md py-3 px-3 font-body text-base text-cream"
+              className="w-full bg-transparent border border-cream/20 focus:border-saffron outline-none rounded-md py-3 px-3 font-body text-base text-cream"
             />
           </div>
           <div>
@@ -57,7 +57,7 @@ export default function AdminLogin() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-transparent border border-cream/20 focus:border-gold outline-none rounded-md py-3 px-3 font-body text-base text-cream"
+              className="w-full bg-transparent border border-cream/20 focus:border-saffron outline-none rounded-md py-3 px-3 font-body text-base text-cream"
             />
           </div>
 
@@ -68,7 +68,7 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-2 rounded-md bg-gold py-3 font-body text-base font-medium text-white transition-colors hover:bg-gold/90 disabled:opacity-50"
+            className="mt-2 rounded-md bg-saffron py-3 font-body text-base font-bold text-ink transition-colors hover:bg-[hsl(36_80%_63%)] disabled:opacity-50"
           >
             {submitting ? "Signing in…" : "Sign in"}
           </button>

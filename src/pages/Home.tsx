@@ -1,5 +1,7 @@
 import Navbar from "@/sections/Navbar"
 import Hero from "@/sections/Hero"
+import InfoStrip from "@/sections/InfoStrip"
+import BiryaniHouse from "@/sections/BiryaniHouse"
 import Story from "@/sections/Story"
 import MenuTeaser from "@/sections/MenuTeaser"
 import Offers from "@/sections/Offers"
@@ -13,8 +15,10 @@ export default function Home() {
     <>
       <Navbar />
       <Hero />
-      <Story />
+      <InfoStrip />
       <MenuTeaser />
+      <BiryaniHouse />
+      <Story />
       <Offers />
       <Gallery />
       <Locations />

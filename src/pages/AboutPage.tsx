@@ -22,14 +22,15 @@ export default function AboutPage() {
     <>
       <Navbar />
 
-      <main className="bg-cream min-h-screen pt-36 pb-24">
+      <header className="bg-teal pt-24 text-cream md:pt-28">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-6 pb-14 pt-10 md:pb-16">
+          <p className="font-body text-xs font-bold uppercase tracking-[0.2em] text-saffron">{t("aboutEyebrow")}</p>
+          <h1 className="font-display text-5xl md:text-7xl">{t("aboutTitle")}</h1>
+        </div>
+      </header>
+
+      <main className="bg-cream min-h-screen pt-16 pb-24">
         <div className="max-w-3xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="font-body text-[0.65rem] tracking-mega uppercase text-gold mb-4">
-              {t("aboutEyebrow")}
-            </p>
-            <h1 className="font-display text-4xl md:text-5xl">{t("aboutTitle")}</h1>
-          </div>
 
           {loading && (
             <p className="text-center font-body text-foreground/50">Loading...</p>

@@ -144,7 +144,7 @@ Guests: ${form.guests}`
 
           <button
             type="submit"
-            className="mt-4 bg-gold text-cream py-3 text-xs tracking-mega uppercase font-body hover:bg-gold/90 transition-colors"
+            className="mt-4 rounded-md bg-teal py-3.5 font-body text-base font-bold text-cream transition-colors hover:bg-[hsl(182_69%_24%)]"
           >
             {t("sendViaWhatsApp")}
           </button>

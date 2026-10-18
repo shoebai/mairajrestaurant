@@ -136,7 +136,7 @@ export default function AdminGallery() {
                   </span>
                 )}
                 {i === 0 && (
-                  <span className="absolute left-2 top-2 rounded bg-gold px-2 py-0.5 font-body text-[11px] font-medium text-white">
+                  <span className="absolute left-2 top-2 rounded bg-saffron px-2 py-0.5 font-body text-[11px] font-bold text-ink">
                     Shown largest
                   </span>
                 )}
