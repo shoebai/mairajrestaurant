@@ -1,5 +1,19 @@
-import { useMemo, useState } from "react"
-import { Play, X, Plus, Minus, Trash2, ChevronLeft, ChevronRight, Search } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import {
+  Play,
+  X,
+  Plus,
+  Minus,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Info,
+  MapPin,
+  LocateFixed,
+  Loader2,
+  ExternalLink,
+} from "lucide-react"
 import Navbar from "@/sections/Navbar"
 import Footer from "@/sections/Footer"
 import { useMenuItems, type MenuItem } from "@/lib/firestoreMenu"
@@ -9,6 +23,10 @@ import { optimizedImage } from "@/lib/storage"
 
 type OrderMap = Record<string, number>
 type OrderType = "pickup" | "delivery"
+type PinnedLocation = { lat: number; lng: number; accuracy: number }
+
+const NOTE_MAX = 300
+const mapLink = (loc: PinnedLocation) => `https://maps.google.com/?q=${loc.lat.toFixed(6)},${loc.lng.toFixed(6)}`
 
 const priceOf = (item?: MenuItem) => parseFloat(item?.price ?? "") || 0
 
@@ -24,6 +42,14 @@ export default function MenuPage() {
   const [cartOpen, setCartOpen] = useState(false)
   const [orderType, setOrderType] = useState<OrderType>("pickup")
   const [address, setAddress] = useState("")
+  const [location, setLocation] = useState<PinnedLocation | null>(null)
+  const [locating, setLocating] = useState(false)
+  const [locationError, setLocationError] = useState("")
+  const [note, setNote] = useState("")
+  const chipsRef = useRef<HTMLDivElement>(null)
+  const listTopRef = useRef<HTMLDivElement>(null)
+  const [canScrollStart, setCanScrollStart] = useState(false)
+  const [canScrollEnd, setCanScrollEnd] = useState(false)
   const [activeVideo, setActiveVideo] = useState<MenuItem | null>(null)
   const [activeImageItem, setActiveImageItem] = useState<MenuItem | null>(null)
   const [imageIndex, setImageIndex] = useState(0)
@@ -38,23 +64,70 @@ export default function MenuPage() {
     return Array.from(seen, ([name, nameAr]) => ({ name, nameAr }))
   }, [items])
 
-  const sections = useMemo(() => {
+  // Dishes that match the search box (all dishes when it's empty).
+  const matching = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return categories
-      .filter((c) => !category || c.name === category)
-      .map((c) => ({
-        ...c,
-        items: items.filter(
-          (i) =>
-            i.category === c.name &&
-            (!q ||
-              i.name.toLowerCase().includes(q) ||
-              (i.nameAr ?? "").includes(search.trim()) ||
-              (i.desc ?? "").toLowerCase().includes(q))
-        ),
-      }))
-      .filter((s) => s.items.length > 0)
-  }, [categories, items, category, search])
+    if (!q) return items
+    return items.filter(
+      (i) =>
+        i.name.toLowerCase().includes(q) ||
+        (i.nameAr ?? "").includes(search.trim()) ||
+        (i.desc ?? "").toLowerCase().includes(q) ||
+        i.category.toLowerCase().includes(q)
+    )
+  }, [items, search])
+
+  const countByCategory = useMemo(() => {
+    const counts = new Map<string, number>()
+    matching.forEach((i) => counts.set(i.category, (counts.get(i.category) ?? 0) + 1))
+    return counts
+  }, [matching])
+
+  const sections = useMemo(
+    () =>
+      categories
+        .filter((c) => !category || c.name === category)
+        .map((c) => ({ ...c, items: matching.filter((i) => i.category === c.name) }))
+        .filter((s) => s.items.length > 0),
+    [categories, matching, category]
+  )
+
+  // Show the fade + arrow only when the chip row can scroll that way.
+  const updateChipArrows = () => {
+    const el = chipsRef.current
+    if (!el) return
+    const pos = Math.abs(el.scrollLeft)
+    setCanScrollStart(pos > 4)
+    setCanScrollEnd(pos + el.clientWidth < el.scrollWidth - 4)
+  }
+  useEffect(() => {
+    updateChipArrows()
+    window.addEventListener("resize", updateChipArrows)
+    return () => window.removeEventListener("resize", updateChipArrows)
+  }, [categories.length])
+
+  const scrollChips = (towardsEnd: boolean) => {
+    const el = chipsRef.current
+    if (!el) return
+    const rtl = getComputedStyle(el).direction === "rtl"
+    const amount = el.clientWidth * 0.7 * (towardsEnd ? 1 : -1) * (rtl ? -1 : 1)
+    el.scrollBy({ left: amount, behavior: "smooth" })
+  }
+
+  const pickCategory = (name: string, chip?: HTMLElement) => {
+    setCategory(name)
+    chip?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
+    // If the visitor is far down the list, bring the results into view.
+    const top = listTopRef.current?.getBoundingClientRect().top ?? 0
+    if (top < 0) listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
+  const onSearch = (value: string) => {
+    setSearch(value)
+    if (value && category) setCategory("")
+  }
+
+  const resultCount = matching.length
 
   const byName = useMemo(() => new Map(items.map((i) => [i.name, i])), [items])
   const totalItems = Object.values(order).reduce((n, q) => n + q, 0)
@@ -79,18 +152,61 @@ export default function MenuPage() {
   }
   const activeImages = activeImageItem?.images ?? []
 
+  const pinLocation = () => {
+    if (!("geolocation" in navigator)) {
+      setLocationError(t("menuLocationFailed"))
+      return
+    }
+    setLocating(true)
+    setLocationError("")
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy })
+        setLocating(false)
+      },
+      (err) => {
+        setLocationError(err.code === err.PERMISSION_DENIED ? t("menuLocationDenied") : t("menuLocationFailed"))
+        setLocating(false)
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+    )
+  }
+
+  const quickNotes = [
+    t("menuNoteSpicy"),
+    t("menuNoteMild"),
+    t("menuNoteRoti"),
+    t("menuNoteRice"),
+    t("menuNoteRaita"),
+    t("menuNoteOnion"),
+  ]
+  const noteParts = note.split(",").map((p) => p.trim()).filter(Boolean)
+  const toggleQuickNote = (text: string) => {
+    const has = noteParts.includes(text)
+    const next = has ? noteParts.filter((p) => p !== text) : [...noteParts, text]
+    setNote(next.join(", ").slice(0, NOTE_MAX))
+  }
+
+  const isDelivery = orderType === "delivery"
+  const canSend = totalItems > 0 && (!isDelivery || !!location || !!address.trim())
+
   const sendOrder = () => {
     const lines = Object.entries(order).map(([name, qty]) => {
       const item = byName.get(name)
       return `${qty}x ${label(name, item?.nameAr)} — ${item?.price ?? ""}`
     })
-    const typeLabel = orderType === "pickup" ? t("pickup") : t("delivery")
-    const addressLine = orderType === "delivery" ? `\n${ar ? "العنوان" : "Address"}: ${address}` : ""
-    const totalLine = `\n\n${t("menuTotal")}: ${totalPrice} SAR`
-    const message = ar
-      ? `طلب جديد عبر الموقع\nنوع الطلب: ${typeLabel}${addressLine}\n\n${lines.join("\n")}${totalLine}`
-      : `New order via website\nOrder type: ${typeLabel}${addressLine}\n\n${lines.join("\n")}${totalLine}`
-    window.open(`https://wa.me/${RESTAURANT_WHATSAPP}?text=${encodeURIComponent(message)}`, "_blank")
+    const L = ar
+      ? { title: "طلب جديد عبر الموقع", type: "نوع الطلب", address: "العنوان", map: "الموقع على الخريطة", note: "ملاحظات", items: "مجموع الأصناف", fee: "رسوم التوصيل: تُحدد حسب المنطقة" }
+      : { title: "New order via website", type: "Order type", address: "Address", map: "Location", note: "Notes", items: "Items total", fee: "Delivery charge: to be confirmed for my area" }
+
+    const parts = [L.title, `${L.type}: ${isDelivery ? t("delivery") : t("pickup")}`]
+    if (isDelivery && address.trim()) parts.push(`${L.address}: ${address.trim()}`)
+    if (isDelivery && location) parts.push(`${L.map}: ${mapLink(location)}`)
+    parts.push("", ...lines, "", `${L.items}: ${totalPrice} SAR`)
+    if (isDelivery) parts.push(L.fee)
+    if (note.trim()) parts.push("", `${L.note}: ${note.trim()}`)
+
+    window.open(`https://wa.me/${RESTAURANT_WHATSAPP}?text=${encodeURIComponent(parts.join("\n"))}`, "_blank")
   }
 
   return (
@@ -116,42 +232,107 @@ export default function MenuPage() {
       </header>
 
       {/* Search + categories, sticks under the navbar */}
-      <div className="sticky z-30 border-b border-foreground/10 bg-cream/95 backdrop-blur" style={{ top: "var(--nav-h, 72px)" }}>
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-3.5 md:flex-row md:items-center">
-          <label className="flex items-center gap-2.5 rounded-lg border border-foreground/20 bg-white px-3.5 md:w-72">
-            <Search size={17} className="shrink-0 text-foreground/50" />
-            <span className="sr-only">{t("menuSearch")}</span>
+      <div
+        className="sticky z-30 border-b border-foreground/10 bg-cream/95 shadow-[0_8px_20px_-14px_rgba(27,42,43,0.35)] backdrop-blur"
+        style={{ top: "var(--nav-h, 72px)" }}
+      >
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:gap-5">
+          {/* Search */}
+          <div className="relative md:w-80 md:shrink-0">
+            <Search size={18} className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-foreground/45" />
+            <label htmlFor="menu-search" className="sr-only">{t("menuSearch")}</label>
             <input
+              id="menu-search"
               type="search"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => onSearch(e.target.value)}
+              onKeyDown={(e) => e.key === "Escape" && onSearch("")}
               placeholder={t("menuSearch")}
-              className="min-w-0 flex-1 bg-transparent py-2.5 font-body text-base outline-none"
+              autoComplete="off"
+              className="w-full rounded-full border border-foreground/15 bg-white py-3 pe-24 ps-11 font-body text-base shadow-sm outline-none transition-[border-color,box-shadow] placeholder:text-foreground/40 focus:border-teal focus:shadow-[0_0_0_3px_hsl(182_69%_18%/0.15)] [&::-webkit-search-cancel-button]:hidden"
             />
-          </label>
-          <div className="-mx-6 flex gap-2 overflow-x-auto px-6 pb-0.5 md:mx-0 md:flex-1 md:px-0">
-            {[{ name: "", nameAr: "" }, ...categories].map((c) => {
-              const on = category === c.name
-              return (
+            {search && (
+              <div className="absolute end-1.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
+                <span className="font-body text-xs text-foreground/50" aria-live="polite">
+                  {resultCount} {t("menuResults")}
+                </span>
                 <button
-                  key={c.name || "all"}
-                  onClick={() => setCategory(c.name)}
-                  className={`shrink-0 rounded-full border px-4 py-2 font-body text-sm font-bold transition-colors ${
-                    on
-                      ? "border-teal bg-teal text-cream"
-                      : "border-foreground/20 bg-white text-foreground hover:border-teal"
-                  }`}
+                  onClick={() => onSearch("")}
+                  aria-label={t("menuClearSearch")}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
                 >
-                  {c.name ? label(c.name, c.nameAr) : t("menuAll")}
+                  <X size={17} />
                 </button>
-              )
-            })}
+              </div>
+            )}
+          </div>
+
+          {/* Category chips */}
+          <div className="relative min-w-0 md:flex-1">
+            {canScrollStart && (
+              <div className="pointer-events-none absolute inset-y-0 start-0 z-10 flex w-14 items-center bg-gradient-to-r from-cream via-cream/90 to-transparent rtl:bg-gradient-to-l">
+                <button
+                  onClick={() => scrollChips(false)}
+                  aria-label={t("menuScrollLeft")}
+                  className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-foreground/15 bg-white shadow-sm hover:border-teal md:flex"
+                >
+                  <ChevronLeft size={16} className="rtl:rotate-180" />
+                </button>
+              </div>
+            )}
+            <div
+              ref={chipsRef}
+              onScroll={updateChipArrows}
+              role="tablist"
+              aria-label={t("menuPageTitle")}
+              className="-mx-4 flex snap-x gap-2 overflow-x-auto scroll-px-4 px-4 py-0.5 [scrollbar-width:none] sm:-mx-6 sm:px-6 md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+            >
+              {[{ name: "", nameAr: "" }, ...categories].map((c) => {
+                const on = category === c.name
+                const count = c.name ? countByCategory.get(c.name) ?? 0 : resultCount
+                const empty = !!search && count === 0
+                return (
+                  <button
+                    key={c.name || "all"}
+                    role="tab"
+                    aria-selected={on}
+                    onClick={(e) => pickCategory(c.name, e.currentTarget)}
+                    disabled={empty}
+                    className={`flex shrink-0 snap-start items-center gap-2 rounded-full border py-2 pe-2 ps-4 font-body text-sm font-semibold transition-colors disabled:opacity-35 ${
+                      on
+                        ? "border-teal bg-teal text-cream shadow-sm"
+                        : "border-foreground/15 bg-white text-foreground hover:border-teal hover:text-teal"
+                    }`}
+                  >
+                    {c.name ? label(c.name, c.nameAr) : t("menuAll")}
+                    <span
+                      className={`min-w-[1.6rem] rounded-full px-1.5 py-0.5 text-center text-xs font-bold ${
+                        on ? "bg-saffron text-ink" : "bg-cream text-foreground/60"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+            {canScrollEnd && (
+              <div className="pointer-events-none absolute inset-y-0 end-0 z-10 flex w-14 items-center justify-end bg-gradient-to-l from-cream via-cream/90 to-transparent rtl:bg-gradient-to-r">
+                <button
+                  onClick={() => scrollChips(true)}
+                  aria-label={t("menuScrollRight")}
+                  className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-foreground/15 bg-white shadow-sm hover:border-teal md:flex"
+                >
+                  <ChevronRight size={16} className="rtl:rotate-180" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       <main className="min-h-[50vh] bg-cream pb-36">
-        <div className="mx-auto max-w-6xl px-6">
+        <div ref={listTopRef} className="mx-auto max-w-6xl px-6" style={{ scrollMarginTop: "calc(var(--nav-h, 72px) + 9rem)" }}>
           {loading && <p className="py-16 text-center font-body text-foreground/50">Loading menu…</p>}
           {!loading && items.length === 0 && (
             <p className="py-16 text-center font-body text-foreground/50">The menu is being updated — check back shortly.</p>
@@ -319,11 +500,6 @@ export default function MenuPage() {
                   })}
                 </ul>
 
-                <p className="mb-6 flex justify-between font-body text-lg">
-                  <span>{t("menuTotal")}</span>
-                  <strong className="text-teal">{totalPrice} SAR</strong>
-                </p>
-
                 <p className="mb-2 font-body text-sm font-bold text-foreground/70">{t("orderType")}</p>
                 <div className="mb-5 grid grid-cols-2 gap-2.5">
                   {(["pickup", "delivery"] as const).map((type) => (
@@ -339,20 +515,116 @@ export default function MenuPage() {
                   ))}
                 </div>
 
-                {orderType === "delivery" && (
-                  <label className="mb-5 block">
-                    <span className="mb-2 block font-body text-sm font-bold text-foreground/70">{t("deliveryAddress")}</span>
+                {isDelivery && (
+                  <div className="mb-5 flex flex-col gap-3">
+                    <span className="font-body text-sm font-bold text-foreground/70">{t("deliveryAddress")}</span>
+
+                    {location ? (
+                      <div className="flex items-center gap-3 rounded-lg border border-emerald-300 bg-emerald-50 p-3">
+                        <MapPin size={20} className="shrink-0 text-emerald-700" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-body text-sm font-bold text-emerald-900">{t("menuLocationAdded")}</p>
+                          <a
+                            href={mapLink(location)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 font-body text-xs text-emerald-800 underline-offset-2 hover:underline"
+                          >
+                            {t("menuLocationView")} <ExternalLink size={11} />
+                          </a>
+                          {location.accuracy > 200 && (
+                            <p className="font-body text-xs text-emerald-800/80">±{Math.round(location.accuracy)} m</p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setLocation(null)}
+                          className="rounded-md px-2 py-1 font-body text-xs font-semibold text-emerald-900 hover:bg-emerald-100"
+                        >
+                          {t("menuLocationRemove")}
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={pinLocation}
+                        disabled={locating}
+                        className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-teal/40 bg-white py-3 font-body text-sm font-bold text-teal transition-colors hover:border-teal hover:bg-teal/5 disabled:opacity-60"
+                      >
+                        {locating ? <Loader2 size={17} className="animate-spin" /> : <LocateFixed size={17} />}
+                        {locating ? t("menuLocating") : t("menuUseLocation")}
+                      </button>
+                    )}
+                    {locationError && <p className="font-body text-xs text-destructive">{locationError}</p>}
+
                     <textarea
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      placeholder={t("deliveryAddressPlaceholder")}
+                      placeholder={location ? t("menuAddressOptional") : t("deliveryAddressPlaceholder")}
+                      aria-label={t("deliveryAddress")}
                       rows={2}
                       className="admin-input resize-none"
                     />
-                  </label>
+                  </div>
                 )}
 
-                <div className="flex gap-2.5">
+                {/* Notes for the kitchen */}
+                <div className="mb-5 flex flex-col gap-2.5">
+                  <label htmlFor="order-note" className="font-body text-sm font-bold text-foreground/70">
+                    {t("menuOrderNote")}
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {quickNotes.map((q) => {
+                      const on = noteParts.includes(q)
+                      return (
+                        <button
+                          key={q}
+                          onClick={() => toggleQuickNote(q)}
+                          aria-pressed={on}
+                          className={`rounded-full border px-3 py-1.5 font-body text-xs font-semibold transition-colors ${
+                            on ? "border-saffron bg-saffron text-ink" : "border-foreground/15 bg-white text-foreground/75 hover:border-teal"
+                          }`}
+                        >
+                          {on ? "✓ " : "+ "}
+                          {q}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <textarea
+                    id="order-note"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value.slice(0, NOTE_MAX))}
+                    placeholder={t("menuOrderNotePlaceholder")}
+                    rows={2}
+                    className="admin-input resize-none"
+                  />
+                  {note.length > NOTE_MAX - 50 && (
+                    <p className="text-end font-body text-xs text-foreground/50">{note.length}/{NOTE_MAX}</p>
+                  )}
+                </div>
+
+                {/* Totals + note about charges */}
+                <div className="mb-5 rounded-lg bg-white p-4">
+                  <p className="flex justify-between font-body text-base">
+                    <span>{t("menuSubtotal")}</span>
+                    <strong className="text-teal">{totalPrice} SAR</strong>
+                  </p>
+                  {isDelivery && (
+                    <p className="mt-1.5 flex justify-between font-body text-sm text-foreground/65">
+                      <span>{t("menuDeliveryFee")}</span>
+                      <span>{t("menuDeliveryFeeValue")}</span>
+                    </p>
+                  )}
+                  <p className="mt-3 flex gap-2 border-t border-foreground/10 pt-3 font-body text-xs leading-relaxed text-foreground/65">
+                    <Info size={15} className="mt-0.5 shrink-0 text-gold" />
+                    {isDelivery ? t("menuDeliveryNote") : t("menuPickupNote")}
+                  </p>
+                </div>
+
+                {isDelivery && !canSend && (
+                  <p className="mb-3 text-center font-body text-xs text-foreground/60">{t("menuAddressOrLocation")}</p>
+                )}
+
+                <div className="sticky -bottom-6 -mx-6 flex gap-2.5 border-t border-foreground/10 bg-cream px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4">
                   <button
                     onClick={() => setOrder({})}
                     className="flex items-center gap-1.5 rounded-lg border border-foreground/20 px-4 py-3 font-body text-sm text-foreground/70 hover:border-destructive hover:text-destructive"
@@ -361,7 +633,7 @@ export default function MenuPage() {
                   </button>
                   <button
                     onClick={sendOrder}
-                    disabled={orderType === "delivery" && !address.trim()}
+                    disabled={!canSend}
                     className="flex-1 rounded-lg bg-saffron py-3 font-body text-base font-bold text-ink hover:bg-[hsl(36_80%_63%)] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {t("orderViaWhatsApp")}
