@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useSlideshow } from "@/hooks/useSlideshow"
 import { useReveal } from "@/hooks/useReveal"
 import { useT, useLanguage } from "@/lib/i18n"
 import { useGallery } from "@/lib/firestoreGallery"
@@ -17,17 +18,12 @@ function GalleryTile({
   images: string[]
   large: boolean
 }) {
-  const [active, setActive] = useState(0)
-
-  useEffect(() => {
-    if (images.length < 2) return
-    const id = setInterval(() => setActive((i) => (i + 1) % images.length), SLIDE_INTERVAL)
-    return () => clearInterval(id)
-  }, [images.length])
+  const { active, next, prev, swipeHandlers } = useSlideshow(images.length, SLIDE_INTERVAL)
 
   return (
     <div
-      className={`relative aspect-square overflow-hidden bg-foreground/5 ${
+      {...swipeHandlers}
+      className={`group relative aspect-square touch-pan-y select-none overflow-hidden bg-foreground/5 ${
         large ? "md:col-span-2 md:aspect-auto md:row-span-2" : ""
       }`}
     >
@@ -37,12 +33,32 @@ function GalleryTile({
           src={optimizedImage(src, large ? 1400 : 800)}
           alt={title}
           loading="lazy"
+          draggable={false}
           className="absolute inset-0 w-full h-full object-cover transition-opacity ease-in-out"
-          style={{ opacity: i === active ? 1 : 0, transitionDuration: "1200ms" }}
+          style={{ opacity: i === active ? 1 : 0, transitionDuration: "700ms" }}
         />
       ))}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={prev}
+            aria-label={`Previous photo of ${title}`}
+            className="absolute start-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-cream transition-opacity hover:bg-saffron hover:text-ink md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+          >
+            <ChevronLeft size={18} className="rtl:rotate-180" />
+          </button>
+          <button
+            onClick={next}
+            aria-label={`Next photo of ${title}`}
+            className="absolute end-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-cream transition-opacity hover:bg-saffron hover:text-ink md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+          >
+            <ChevronRight size={18} className="rtl:rotate-180" />
+          </button>
+        </>
+      )}
+
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
       <div className="absolute inset-x-0 bottom-0 p-4">
         <span className="font-display text-cream text-sm md:text-base italic block">{title}</span>
@@ -57,7 +73,7 @@ function GalleryTile({
             <span
               key={i}
               className={`h-1 rounded-full transition-all duration-300 ${
-                i === active ? "w-4 bg-gold" : "w-1 bg-cream/50"
+                i === active ? "w-4 bg-saffron" : "w-1 bg-cream/50"
               }`}
             />
           ))}

@@ -80,3 +80,64 @@ export function useHomeText() {
 export async function updateHomeText(data: HomeText) {
   await setDoc(homeTextRef, data)
 }
+
+// ── Watermark ──────────────────────────────────────────────────────────
+// A faint background picture (the Mairaj logo or any uploaded image, e.g.
+// a biryani pot drawing) behind chosen homepage sections.
+
+export const WATERMARK_SECTIONS = [
+  { id: "favourites", label: "Favourite dishes" },
+  { id: "biryani", label: "Biryani house" },
+  { id: "story", label: "Our story" },
+] as const
+
+export type WatermarkSection = (typeof WATERMARK_SECTIONS)[number]["id"]
+
+export interface WatermarkSettings {
+  enabled: boolean
+  /** Uploaded image URL; empty means the Mairaj logo. */
+  image: string
+  /** 0.02 – 0.25 */
+  opacity: number
+  size: "small" | "medium" | "large"
+  position: "left" | "center" | "right"
+  sections: WatermarkSection[]
+  /** Show in a single faded colour instead of full colour. */
+  monochrome: boolean
+}
+
+export const DEFAULT_WATERMARK: WatermarkSettings = {
+  enabled: false,
+  image: "",
+  opacity: 0.07,
+  size: "large",
+  position: "right",
+  sections: ["favourites", "story"],
+  monochrome: true,
+}
+
+const watermarkRef = doc(db, "site", "watermark")
+
+export function useWatermark() {
+  const [watermark, setWatermark] = useState<WatermarkSettings>(DEFAULT_WATERMARK)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(
+    () =>
+      onSnapshot(
+        watermarkRef,
+        (snap) => {
+          setWatermark({ ...DEFAULT_WATERMARK, ...(snap.data() as Partial<WatermarkSettings> | undefined) })
+          setLoading(false)
+        },
+        () => setLoading(false)
+      ),
+    []
+  )
+
+  return { watermark, loading }
+}
+
+export async function updateWatermark(data: WatermarkSettings) {
+  await setDoc(watermarkRef, data)
+}

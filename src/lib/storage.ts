@@ -50,7 +50,10 @@ export async function compressImage(file: File): Promise<Blob> {
     new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, 0.85))
 
   let blob = await toBlob("image/webp")
-  if (!blob || blob.type !== "image/webp") blob = await toBlob("image/jpeg")
+  if (!blob || blob.type !== "image/webp") {
+    // JPEG has no transparency, so keep PNGs (e.g. a logo or watermark) as PNG.
+    blob = await toBlob(file.type === "image/png" ? "image/png" : "image/jpeg")
+  }
   if (!blob) return file
 
   return blob.size < file.size ? blob : file

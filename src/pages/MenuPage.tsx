@@ -17,11 +17,12 @@ import {
 import Navbar from "@/sections/Navbar"
 import Footer from "@/sections/Footer"
 import { useMenuItems, type MenuItem } from "@/lib/firestoreMenu"
+import { useCart } from "@/lib/cart"
+import { useSearchParams } from "react-router"
 import { useT, useLanguage } from "@/lib/i18n"
 import { RESTAURANT_WHATSAPP } from "@/lib/config"
 import { optimizedImage } from "@/lib/storage"
 
-type OrderMap = Record<string, number>
 type OrderType = "pickup" | "delivery"
 type PinnedLocation = { lat: number; lng: number; accuracy: number }
 
@@ -38,8 +39,19 @@ export default function MenuPage() {
 
   const [category, setCategory] = useState("")
   const [search, setSearch] = useState("")
-  const [order, setOrder] = useState<OrderMap>({})
-  const [cartOpen, setCartOpen] = useState(false)
+  const { order, totalItems, addItem, removeItem, clear } = useCart()
+  const [params, setParams] = useSearchParams()
+  const [cartOpen, setCartOpen] = useState(params.get("order") === "open")
+
+  // Coming from "View order" on the homepage opens the cart straight away.
+  useEffect(() => {
+    if (params.get("order") === "open") {
+      const next = new URLSearchParams(params)
+      next.delete("order")
+      setParams(next, { replace: true })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [orderType, setOrderType] = useState<OrderType>("pickup")
   const [address, setAddress] = useState("")
   const [location, setLocation] = useState<PinnedLocation | null>(null)
@@ -130,21 +142,11 @@ export default function MenuPage() {
   const resultCount = matching.length
 
   const byName = useMemo(() => new Map(items.map((i) => [i.name, i])), [items])
-  const totalItems = Object.values(order).reduce((n, q) => n + q, 0)
   const totalPrice = Object.entries(order).reduce((sum, [name, q]) => sum + q * priceOf(byName.get(name)), 0)
   const summary = Object.entries(order)
     .map(([name, q]) => `${q}× ${label(name, byName.get(name)?.nameAr)}`)
     .join(", ")
 
-  const addItem = (name: string) => setOrder((o) => ({ ...o, [name]: (o[name] ?? 0) + 1 }))
-  const removeItem = (name: string) =>
-    setOrder((o) => {
-      const next = { ...o }
-      if (!next[name]) return next
-      next[name] -= 1
-      if (next[name] <= 0) delete next[name]
-      return next
-    })
 
   const openImages = (item: MenuItem) => {
     setActiveImageItem(item)
@@ -626,7 +628,7 @@ export default function MenuPage() {
 
                 <div className="sticky -bottom-6 -mx-6 flex gap-2.5 border-t border-foreground/10 bg-cream px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4">
                   <button
-                    onClick={() => setOrder({})}
+                    onClick={clear}
                     className="flex items-center gap-1.5 rounded-lg border border-foreground/20 px-4 py-3 font-body text-sm text-foreground/70 hover:border-destructive hover:text-destructive"
                   >
                     <Trash2 size={15} /> {t("clear")}

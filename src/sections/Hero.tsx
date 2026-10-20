@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useSlideshow } from "@/hooks/useSlideshow"
 import { Link } from "react-router"
 import { useT, useLanguage } from "@/lib/i18n"
 import { useHeroSettings, useHomeText } from "@/lib/firestoreSite"
@@ -16,7 +17,6 @@ export default function Hero() {
   const t = useT()
   const { lang } = useLanguage()
   const { get } = useHomeText()
-  const [active, setActive] = useState(0)
   const { hero, loading } = useHeroSettings()
 
   const slides = loading
@@ -25,12 +25,7 @@ export default function Hero() {
       ? hero.images.map((url) => optimizedImage(url, 1000))
       : defaultSlides
 
-  useEffect(() => {
-    setActive(0)
-    if (slides.length < 2) return
-    const id = setInterval(() => setActive((i) => (i + 1) % slides.length), SLIDE_DURATION)
-    return () => clearInterval(id)
-  }, [slides.length])
+  const { active, goTo, next, prev, swipeHandlers } = useSlideshow(slides.length, SLIDE_DURATION)
 
   const secondLine = t("heritageSecondLine")
 
@@ -72,29 +67,49 @@ export default function Hero() {
         {/* Arch-framed slideshow (photos from Admin → Homepage photos) */}
         <div className="flex flex-1 justify-center">
           <div className="relative aspect-[5/6] w-full max-w-[30rem] rounded-t-full border-[3px] border-b-0 border-saffron px-3 pt-3 md:px-3.5 md:pt-3.5">
-            <div className="relative h-full w-full overflow-hidden rounded-t-full bg-ink">
+            <div
+              {...swipeHandlers}
+              className="relative h-full w-full touch-pan-y select-none overflow-hidden rounded-t-full bg-ink"
+            >
               {slides.map((src, i) => (
                 <img
                   key={src}
                   src={src}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-cover transition-opacity duration-[1500ms] ease-in-out"
+                  draggable={false}
+                  className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out"
                   style={{ opacity: i === active ? 1 : 0 }}
                 />
               ))}
             </div>
             {slides.length > 1 && (
-              <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
+              <div className="absolute inset-x-0 bottom-4 flex items-center justify-center gap-3">
+                <button
+                  onClick={prev}
+                  aria-label="Previous photo"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-ink/55 text-cream backdrop-blur-sm transition-colors hover:bg-saffron hover:text-ink"
+                >
+                  <ChevronLeft size={20} className="rtl:rotate-180" />
+                </button>
+                <div className="flex gap-2">
                 {slides.map((_, i) => (
                   <button
                     key={i}
-                    onClick={() => setActive(i)}
+                    onClick={() => goTo(i)}
                     aria-label={`Show photo ${i + 1}`}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
                       i === active ? "w-6 bg-saffron" : "w-1.5 bg-cream/60 hover:bg-cream"
                     }`}
                   />
                 ))}
+                </div>
+                <button
+                  onClick={next}
+                  aria-label="Next photo"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-ink/55 text-cream backdrop-blur-sm transition-colors hover:bg-saffron hover:text-ink"
+                >
+                  <ChevronRight size={20} className="rtl:rotate-180" />
+                </button>
               </div>
             )}
           </div>

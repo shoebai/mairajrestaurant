@@ -2,6 +2,7 @@ import { useReveal } from "@/hooks/useReveal"
 import { useMenuItems } from "@/lib/firestoreMenu"
 import { useT, useLanguage } from "@/lib/i18n"
 import { useHomeText } from "@/lib/firestoreSite"
+import Watermark from "@/sections/Watermark"
 
 /** Lists every dish with "biryani" in its name, straight from Admin → Menu. */
 export default function BiryaniHouse() {
@@ -15,8 +16,9 @@ export default function BiryaniHouse() {
   if (biryanis.length === 0) return null
 
   return (
-    <section id="biryani" className="bg-sand">
-      <div ref={ref} className="reveal mx-auto flex max-w-6xl flex-col gap-12 px-6 py-24 md:flex-row md:gap-16 md:py-28">
+    <section id="biryani" className="relative overflow-hidden bg-sand">
+      <Watermark section="biryani" />
+      <div ref={ref} className="reveal relative z-[1] mx-auto flex max-w-6xl flex-col gap-12 px-6 py-24 md:flex-row md:gap-16 md:py-28">
         <div className="flex flex-col gap-4 md:w-2/5">
           <p className="font-body text-xs font-bold uppercase tracking-[0.2em] text-gold">{t("biryaniEyebrow")}</p>
           <h2 className="font-display text-4xl leading-tight md:text-6xl">{get("biryaniTitle", lang) || t("biryaniTitle")}</h2>

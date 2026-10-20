@@ -2,6 +2,7 @@ import Navbar from "@/sections/Navbar"
 import Hero from "@/sections/Hero"
 import InfoStrip from "@/sections/InfoStrip"
 import BiryaniHouse from "@/sections/BiryaniHouse"
+import CartBar from "@/sections/CartBar"
 import Story from "@/sections/Story"
 import MenuTeaser from "@/sections/MenuTeaser"
 import Offers from "@/sections/Offers"
@@ -24,6 +25,7 @@ export default function Home() {
       <Locations />
       <Reservation />
       <Footer />
+      <CartBar />
     </>
   )
 }

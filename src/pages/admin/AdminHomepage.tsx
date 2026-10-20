@@ -7,12 +7,17 @@ import {
   useHomeText,
   updateHomeText,
   HOME_TEXT_FIELDS,
+  useWatermark,
+  updateWatermark,
+  WATERMARK_SECTIONS,
   type HomeText,
   type HomeTextKey,
+  type WatermarkSettings,
 } from "@/lib/firestoreSite"
+import { WatermarkImage } from "@/sections/Watermark"
 import { translate } from "@/lib/i18n"
 import ImageUploader from "@/components/admin/ImageUploader"
-import { Field, PageHeader, PrimaryButton } from "@/components/admin/AdminUI"
+import { Field, PageHeader, PrimaryButton, Toggle } from "@/components/admin/AdminUI"
 import hero1 from "@/assets/hero/hero-1.webp"
 import hero2 from "@/assets/hero/hero-2.webp"
 import hero3 from "@/assets/hero/hero-3.webp"
@@ -47,6 +52,29 @@ export default function AdminHomepage() {
 
   const [text, setText] = useState<HomeText>({})
   const [savingText, setSavingText] = useState(false)
+
+  const { watermark: savedMark, loading: markLoading } = useWatermark()
+  const [mark, setMark] = useState<WatermarkSettings>(savedMark)
+  const [markUploading, setMarkUploading] = useState(false)
+  const [savingMark, setSavingMark] = useState(false)
+  useEffect(() => {
+    if (!markLoading) setMark(savedMark)
+  }, [markLoading, savedMark])
+  const markDirty = JSON.stringify(mark) !== JSON.stringify(savedMark)
+  const onMarkBusy = useCallback((b: boolean) => setMarkUploading(b), [])
+  const setM = (patch: Partial<WatermarkSettings>) => setMark((m) => ({ ...m, ...patch }))
+
+  const saveMark = async () => {
+    setSavingMark(true)
+    try {
+      await updateWatermark(mark)
+      toast.success(mark.enabled ? "Watermark updated — it's live now" : "Watermark turned off")
+    } catch {
+      toast.error("Couldn't save. Check your connection and try again.")
+    } finally {
+      setSavingMark(false)
+    }
+  }
 
   useEffect(() => {
     if (!loading) setImages(hero.images)
@@ -101,7 +129,7 @@ export default function AdminHomepage() {
     }
   }
 
-  if (loading || textLoading) {
+  if (loading || textLoading || markLoading) {
     return (
       <p className="flex items-center gap-2 font-body text-foreground/50">
         <Loader2 size={16} className="animate-spin" /> Loading…
@@ -111,7 +139,7 @@ export default function AdminHomepage() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title="Homepage" subtitle="Change the slideshow photos and the headings and paragraphs on the homepage." />
+      <PageHeader title="Homepage" subtitle="Change the slideshow photos, the background watermark, and the headings on the homepage." />
 
       {/* Photos */}
       <section className="mb-8 flex flex-col gap-6 rounded-xl border border-foreground/10 bg-white p-5 md:p-6">
@@ -143,6 +171,151 @@ export default function AdminHomepage() {
             {uploading ? "Waiting for photos…" : savingPhotos ? "Saving…" : "Save photos"}
           </PrimaryButton>
           {photosDirty && !savingPhotos && <span className="font-body text-sm text-foreground/55">Unsaved changes</span>}
+        </div>
+      </section>
+
+      {/* Watermark */}
+      <section className="mb-8 flex flex-col gap-5 rounded-xl border border-foreground/10 bg-white p-5 md:p-6">
+        <div>
+          <h2 className="font-display text-2xl">Background watermark</h2>
+          <p className="font-body text-sm text-foreground/60">
+            A faint picture behind some homepage sections, like the Mairaj logo or a drawing of a biryani pot.
+          </p>
+        </div>
+
+        <Toggle checked={mark.enabled} onChange={(enabled) => setM({ enabled })} label="Show watermark" description="Turn off any time to hide it." />
+
+        {mark.enabled && (
+          <>
+            <div className="flex flex-col gap-2">
+              <span className="font-body text-sm font-semibold text-foreground/80">Picture</span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setM({ image: "" })}
+                  className={`rounded-full border px-4 py-2 font-body text-sm font-semibold ${
+                    !mark.image ? "border-teal bg-teal text-cream" : "border-foreground/20 hover:border-teal"
+                  }`}
+                >
+                  Mairaj logo
+                </button>
+                <span className="self-center font-body text-sm text-foreground/50">or upload your own:</span>
+              </div>
+              <ImageUploader
+                value={mark.image ? [mark.image] : []}
+                onChange={(urls) => setM({ image: urls[0] ?? "" })}
+                folder="watermark"
+                multiple={false}
+                onBusyChange={onMarkBusy}
+                hint="Best: a PNG with a transparent background, or a simple drawing on white (white areas disappear)."
+              />
+            </div>
+
+            <label className="flex flex-col gap-2">
+              <span className="flex justify-between font-body text-sm font-semibold text-foreground/80">
+                Strength <span className="font-normal text-foreground/55">{Math.round(mark.opacity * 100)}%</span>
+              </span>
+              <input
+                type="range"
+                min={2}
+                max={25}
+                value={Math.round(mark.opacity * 100)}
+                onChange={(e) => setM({ opacity: Number(e.target.value) / 100 })}
+                className="accent-[hsl(182_69%_18%)]"
+              />
+              <span className="font-body text-xs text-foreground/50">Keep it faint (5–10%) so text stays easy to read.</span>
+            </label>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <span className="font-body text-sm font-semibold text-foreground/80">Size</span>
+                <div className="flex gap-2">
+                  {(["small", "medium", "large"] as const).map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setM({ size })}
+                      className={`flex-1 rounded-md border py-2 font-body text-sm capitalize ${
+                        mark.size === size ? "border-teal bg-teal text-cream" : "border-foreground/20 hover:border-teal"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <span className="font-body text-sm font-semibold text-foreground/80">Position</span>
+                <div className="flex gap-2">
+                  {(["left", "center", "right"] as const).map((position) => (
+                    <button
+                      key={position}
+                      type="button"
+                      onClick={() => setM({ position })}
+                      className={`flex-1 rounded-md border py-2 font-body text-sm capitalize ${
+                        mark.position === position ? "border-teal bg-teal text-cream" : "border-foreground/20 hover:border-teal"
+                      }`}
+                    >
+                      {position}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <span className="font-body text-sm font-semibold text-foreground/80">Show behind</span>
+              <div className="flex flex-wrap gap-2">
+                {WATERMARK_SECTIONS.map((sec) => {
+                  const on = mark.sections.includes(sec.id)
+                  return (
+                    <label
+                      key={sec.id}
+                      className={`flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 font-body text-sm ${
+                        on ? "border-teal bg-teal/10" : "border-foreground/20"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={() =>
+                          setM({ sections: on ? mark.sections.filter((x) => x !== sec.id) : [...mark.sections, sec.id] })
+                        }
+                        className="accent-[hsl(182_69%_18%)]"
+                      />
+                      {sec.label}
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
+
+            <Toggle
+              checked={mark.monochrome}
+              onChange={(monochrome) => setM({ monochrome })}
+              label="Single colour"
+              description="Tints the picture to match the site instead of showing its own colours."
+            />
+
+            <div className="flex flex-col gap-2">
+              <span className="font-body text-sm font-semibold text-foreground/80">Preview</span>
+              <div className="relative h-56 overflow-hidden rounded-lg border border-foreground/10 bg-cream">
+                <WatermarkImage settings={mark} />
+                <div className="relative z-[1] flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
+                  <p className="font-body text-[10px] font-bold uppercase tracking-[0.2em] text-gold">From the tandoor & the kadai</p>
+                  <p className="font-display text-3xl">Dishes guests come back for</p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        <div className="flex items-center gap-3 border-t border-foreground/10 pt-5">
+          <PrimaryButton onClick={saveMark} disabled={!markDirty || savingMark || markUploading}>
+            {savingMark && <Loader2 size={16} className="animate-spin" />}
+            {markUploading ? "Waiting for picture…" : savingMark ? "Saving…" : "Save watermark"}
+          </PrimaryButton>
+          {markDirty && !savingMark && <span className="font-body text-sm text-foreground/55">Unsaved changes</span>}
         </div>
       </section>
 

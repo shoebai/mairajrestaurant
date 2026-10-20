@@ -5,13 +5,16 @@ import './index.css'
 import App from './App.tsx'
 import { LanguageProvider } from './lib/i18n'
 import { AuthProvider } from './lib/auth'
+import { CartProvider } from './lib/cart'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AuthProvider>
         <LanguageProvider>
-          <App />
+          <CartProvider>
+            <App />
+          </CartProvider>
         </LanguageProvider>
       </AuthProvider>
     </BrowserRouter>
