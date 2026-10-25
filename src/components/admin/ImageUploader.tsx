@@ -83,6 +83,16 @@ export default function ImageUploader({
   const valueRef = useRef(value)
   valueRef.current = value
 
+  // Photos uploaded by THIS box. Only these may be deleted from Cloudinary when
+  // removed; others (e.g. picked from the menu or gallery) are shared.
+  const ownUploads = useRef(new Set<string>())
+  const discard = (url: string) => {
+    if (ownUploads.current.has(url)) {
+      ownUploads.current.delete(url)
+      deleteImageByUrl(url)
+    }
+  }
+
   const busy = pending.some((p) => !p.error) || converting.length > 0
   useEffect(() => {
     onBusyChange?.(busy)
@@ -110,15 +120,18 @@ export default function ImageUploader({
       if (whiteBackground && removeBg) {
         patch(item.id, { stage: "background" })
         try {
+          const original = url
           url = await makeWhiteBackground(url, folder)
+          deleteImageByUrl(original) // just uploaded by this box, nothing else uses it
         } catch (err) {
           toast.warning(
             `${err instanceof Error ? err.message : "Couldn't remove the background."} The original photo was kept.`
           )
         }
       }
+      ownUploads.current.add(url)
       const next = multiple ? [...valueRef.current, url] : [url]
-      if (!multiple) valueRef.current.forEach((old) => deleteImageByUrl(old))
+      if (!multiple) valueRef.current.forEach(discard)
       valueRef.current = next
       onChange(next)
       finish(item.id)
@@ -165,7 +178,7 @@ export default function ImageUploader({
 
   const remove = (url: string) => {
     onChange(value.filter((u) => u !== url))
-    deleteImageByUrl(url)
+    discard(url)
   }
 
   const move = (index: number, dir: -1 | 1) => {
@@ -181,6 +194,8 @@ export default function ImageUploader({
     setConverting((c) => [...c, url])
     try {
       const newUrl = await makeWhiteBackground(url, folder)
+      ownUploads.current.add(newUrl)
+      discard(url)
       const next = valueRef.current.map((u) => (u === url ? newUrl : u))
       valueRef.current = next
       onChange(next)

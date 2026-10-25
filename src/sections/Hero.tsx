@@ -72,14 +72,28 @@ export default function Hero() {
               className="relative h-full w-full touch-pan-y select-none overflow-hidden rounded-t-full bg-ink"
             >
               {slides.map((src, i) => (
-                <img
+                // Every photo fits the arch whatever its shape: the whole photo is
+                // shown, and a blurred copy of it fills any space around it
+                // (white for dish photos on white backgrounds).
+                <div
                   key={src}
-                  src={src}
-                  alt=""
-                  draggable={false}
-                  className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out"
+                  className="absolute inset-0 transition-opacity duration-700 ease-in-out"
                   style={{ opacity: i === active ? 1 : 0 }}
-                />
+                  aria-hidden={i !== active}
+                >
+                  <img
+                    src={src}
+                    alt=""
+                    draggable={false}
+                    className="absolute inset-0 h-full w-full scale-110 object-cover opacity-80 blur-2xl"
+                  />
+                  <img
+                    src={src}
+                    alt=""
+                    draggable={false}
+                    className="absolute inset-0 h-full w-full object-contain object-center p-[6%] pb-[18%]"
+                  />
+                </div>
               ))}
             </div>
             {slides.length > 1 && (

@@ -270,13 +270,13 @@ export default function MenuPage() {
           </div>
 
           {/* Category chips */}
-          <div className="relative min-w-0 md:flex-1">
+          <div className="relative -mx-4 min-w-0 sm:-mx-6 md:mx-0 md:flex-1">
             {canScrollStart && (
-              <div className="pointer-events-none absolute inset-y-0 start-0 z-10 flex w-14 items-center bg-gradient-to-r from-cream via-cream/90 to-transparent rtl:bg-gradient-to-l">
+              <div className="pointer-events-none absolute inset-y-0 start-0 z-10 flex w-8 items-center bg-gradient-to-r from-cream to-transparent rtl:bg-gradient-to-l md:w-16 md:from-cream md:via-cream">
                 <button
                   onClick={() => scrollChips(false)}
                   aria-label={t("menuScrollLeft")}
-                  className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-foreground/15 bg-white shadow-sm hover:border-teal md:flex"
+                  className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-foreground/15 bg-white shadow-sm [@media(hover:hover)]:hover:border-teal md:flex"
                 >
                   <ChevronLeft size={16} className="rtl:rotate-180" />
                 </button>
@@ -287,7 +287,7 @@ export default function MenuPage() {
               onScroll={updateChipArrows}
               role="tablist"
               aria-label={t("menuPageTitle")}
-              className="-mx-4 flex snap-x gap-2 overflow-x-auto scroll-px-4 px-4 py-0.5 [scrollbar-width:none] sm:-mx-6 sm:px-6 md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+              className="flex snap-x gap-2 overflow-x-auto scroll-px-4 px-4 py-1 [scrollbar-width:none] sm:scroll-px-6 sm:px-6 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden"
             >
               {[{ name: "", nameAr: "" }, ...categories].map((c) => {
                 const on = category === c.name
@@ -300,10 +300,10 @@ export default function MenuPage() {
                     aria-selected={on}
                     onClick={(e) => pickCategory(c.name, e.currentTarget)}
                     disabled={empty}
-                    className={`flex shrink-0 snap-start items-center gap-2 rounded-full border py-2 pe-2 ps-4 font-body text-sm font-semibold transition-colors disabled:opacity-35 ${
+                    className={`flex shrink-0 snap-start items-center gap-2 whitespace-nowrap rounded-full border py-2 pe-2 ps-4 font-body text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-saffron disabled:opacity-35 ${
                       on
                         ? "border-teal bg-teal text-cream shadow-sm"
-                        : "border-foreground/15 bg-white text-foreground hover:border-teal hover:text-teal"
+                        : "border-foreground/15 bg-white text-foreground [@media(hover:hover)]:hover:border-teal [@media(hover:hover)]:hover:text-teal"
                     }`}
                   >
                     {c.name ? label(c.name, c.nameAr) : t("menuAll")}
@@ -319,11 +319,11 @@ export default function MenuPage() {
               })}
             </div>
             {canScrollEnd && (
-              <div className="pointer-events-none absolute inset-y-0 end-0 z-10 flex w-14 items-center justify-end bg-gradient-to-l from-cream via-cream/90 to-transparent rtl:bg-gradient-to-r">
+              <div className="pointer-events-none absolute inset-y-0 end-0 z-10 flex w-8 items-center justify-end bg-gradient-to-l from-cream to-transparent rtl:bg-gradient-to-r md:w-16 md:via-cream">
                 <button
                   onClick={() => scrollChips(true)}
                   aria-label={t("menuScrollRight")}
-                  className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-foreground/15 bg-white shadow-sm hover:border-teal md:flex"
+                  className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-foreground/15 bg-white shadow-sm [@media(hover:hover)]:hover:border-teal md:flex"
                 >
                   <ChevronRight size={16} className="rtl:rotate-180" />
                 </button>

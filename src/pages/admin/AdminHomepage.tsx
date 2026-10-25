@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
-import { Loader2, RotateCcw } from "lucide-react"
+import { Images, Loader2, RotateCcw } from "lucide-react"
 import {
   useHeroSettings,
   updateHeroSettings,
@@ -17,6 +17,7 @@ import {
 import { WatermarkImage } from "@/sections/Watermark"
 import { translate } from "@/lib/i18n"
 import ImageUploader from "@/components/admin/ImageUploader"
+import PhotoPicker from "@/components/admin/PhotoPicker"
 import { Field, PageHeader, PrimaryButton, Toggle } from "@/components/admin/AdminUI"
 import hero1 from "@/assets/hero/hero-1.webp"
 import hero2 from "@/assets/hero/hero-2.webp"
@@ -49,6 +50,7 @@ export default function AdminHomepage() {
   const [images, setImages] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [savingPhotos, setSavingPhotos] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   const [text, setText] = useState<HomeText>({})
   const [savingText, setSavingText] = useState(false)
@@ -150,9 +152,28 @@ export default function AdminHomepage() {
             onChange={setImages}
             folder="homepage"
             onBusyChange={onBusyChange}
-            hint="Photos change every 5 seconds. Taller photos (portrait or square) fit the arch best. 3–5 is ideal."
+            hint="Upload as many as you like. Each photo is fitted to the arch automatically. Photos change every 5 seconds and visitors can swipe."
           />
         </Field>
+
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className="flex items-center justify-center gap-2 rounded-lg border border-teal py-3 font-body text-sm font-semibold text-teal transition-colors hover:bg-teal/5"
+        >
+          <Images size={17} /> Add photos from Menu or Gallery
+        </button>
+
+        {pickerOpen && (
+          <PhotoPicker
+            selected={images}
+            onClose={() => setPickerOpen(false)}
+            onDone={(urls) => {
+              setImages(urls)
+              setPickerOpen(false)
+            }}
+          />
+        )}
 
         {images.length === 0 && (
           <div>

@@ -203,8 +203,8 @@ async function waitUntilReady(url: string, timeoutMs = 90_000) {
 
 /**
  * Takes an uploaded photo and returns the URL of a copy with the background
- * replaced by white. The original is removed if it was uploaded in the last
- * 10 minutes from this browser.
+ * replaced by white. The original is left alone; the caller decides whether
+ * to delete it.
  */
 export async function makeWhiteBackground(url: string, folder: string): Promise<string> {
   if (!isStorageConfigured) throw new Error("Photo uploads aren't set up yet.")
@@ -217,8 +217,5 @@ export async function makeWhiteBackground(url: string, folder: string): Promise<
   // Save the finished image as its own photo (uploading from a URL).
   const form = new FormData()
   form.append("file", processed)
-  const newUrl = await send(form, folder)
-
-  deleteImageByUrl(url)
-  return newUrl
+  return send(form, folder)
 }
