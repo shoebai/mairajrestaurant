@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useSlideshow } from "@/hooks/useSlideshow"
+import { useImageTones } from "@/hooks/useImageTone"
 import { Link } from "react-router"
 import { useT, useLanguage } from "@/lib/i18n"
 import { useHeroSettings, useHomeText } from "@/lib/firestoreSite"
@@ -26,6 +27,7 @@ export default function Hero() {
       : defaultSlides
 
   const { active, goTo, next, prev, swipeHandlers } = useSlideshow(slides.length, SLIDE_DURATION)
+  const tones = useImageTones(slides)
 
   const secondLine = t("heritageSecondLine")
 
@@ -71,30 +73,31 @@ export default function Hero() {
               {...swipeHandlers}
               className="relative h-full w-full touch-pan-y select-none overflow-hidden rounded-t-full bg-ink"
             >
-              {slides.map((src, i) => (
-                // Every photo fits the arch whatever its shape: the whole photo is
-                // shown, and a blurred copy of it fills any space around it
-                // (white for dish photos on white backgrounds).
-                <div
-                  key={src}
-                  className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-                  style={{ opacity: i === active ? 1 : 0 }}
-                  aria-hidden={i !== active}
-                >
-                  <img
-                    src={src}
-                    alt=""
-                    draggable={false}
-                    className="absolute inset-0 h-full w-full scale-110 object-cover opacity-80 blur-2xl"
-                  />
-                  <img
-                    src={src}
-                    alt=""
-                    draggable={false}
-                    className="absolute inset-0 h-full w-full object-contain object-center p-[6%] pb-[18%]"
-                  />
-                </div>
-              ))}
+              {slides.map((src, i) => {
+                // Dish photos on a white background are shown whole and blended
+                // into the cream arch (white becomes cream). Other photos, like
+                // the storefront, fill the arch edge to edge.
+                const light = tones[src] === "light"
+                return (
+                  <div
+                    key={src}
+                    className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${light ? "bg-cream" : ""}`}
+                    style={{ opacity: i === active ? 1 : 0 }}
+                    aria-hidden={i !== active}
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      draggable={false}
+                      className={
+                        light
+                          ? "absolute inset-0 h-full w-full object-contain object-center p-[8%] pb-[20%] mix-blend-multiply"
+                          : "absolute inset-0 h-full w-full object-cover"
+                      }
+                    />
+                  </div>
+                )
+              })}
             </div>
             {slides.length > 1 && (
               <div className="absolute inset-x-0 bottom-4 flex items-center justify-center gap-3">
@@ -112,7 +115,7 @@ export default function Hero() {
                     onClick={() => goTo(i)}
                     aria-label={`Show photo ${i + 1}`}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      i === active ? "w-6 bg-saffron" : "w-1.5 bg-cream/60 hover:bg-cream"
+                      i === active ? "w-6 bg-saffron" : "w-1.5 bg-cream/80 ring-1 ring-ink/25 hover:bg-cream"
                     }`}
                   />
                 ))}
