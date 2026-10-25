@@ -42,12 +42,14 @@ export default function MenuPage() {
   const { order, totalItems, addItem, removeItem, clear } = useCart()
   const [params, setParams] = useSearchParams()
   const [cartOpen, setCartOpen] = useState(params.get("order") === "open")
+  const [showOrderHint, setShowOrderHint] = useState(params.get("start") === "order")
 
   // Coming from "View order" on the homepage opens the cart straight away.
   useEffect(() => {
-    if (params.get("order") === "open") {
+    if (params.get("order") === "open" || params.get("start") === "order") {
       const next = new URLSearchParams(params)
       next.delete("order")
+      next.delete("start")
       setParams(next, { replace: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -332,6 +334,25 @@ export default function MenuPage() {
           </div>
         </div>
       </div>
+
+      {/* Tip when arriving from "Order on WhatsApp" on the homepage */}
+      {showOrderHint && totalItems === 0 && (
+        <div className="bg-cream">
+          <div className="mx-auto max-w-6xl px-4 pt-5 sm:px-6">
+            <div role="status" className="flex items-start gap-3 rounded-lg border border-saffron/50 bg-saffron/15 p-3.5">
+              <Plus size={18} className="mt-0.5 shrink-0 rounded-full bg-saffron p-0.5 text-ink" />
+              <p className="flex-1 font-body text-sm text-foreground/80">{t("menuOrderHint")}</p>
+              <button
+                onClick={() => setShowOrderHint(false)}
+                aria-label={t("menuHintClose")}
+                className="-m-1 rounded p-1 text-foreground/50 hover:text-foreground"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="min-h-[50vh] bg-cream pb-36">
         <div ref={listTopRef} className="mx-auto max-w-6xl px-6" style={{ scrollMarginTop: "calc(var(--nav-h, 72px) + 9rem)" }}>

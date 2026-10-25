@@ -93,27 +93,60 @@ export const WATERMARK_SECTIONS = [
 
 export type WatermarkSection = (typeof WATERMARK_SECTIONS)[number]["id"]
 
-export interface WatermarkSettings {
-  enabled: boolean
+export interface WatermarkMark {
+  id: string
   /** Uploaded image URL; empty means the Mairaj logo. */
   image: string
-  /** 0.02 – 0.25 */
-  opacity: number
-  size: "small" | "medium" | "large"
   position: "left" | "center" | "right"
+  vertical: "top" | "middle" | "bottom"
+  size: "small" | "medium" | "large"
+}
+
+export interface WatermarkSettings {
+  enabled: boolean
+  /** Up to 3 pictures, each with its own place and size. */
+  marks: WatermarkMark[]
+  /** 0.02 – 0.25, shared by all pictures */
+  opacity: number
   sections: WatermarkSection[]
   /** Show in a single faded colour instead of full colour. */
   monochrome: boolean
 }
 
+export const MAX_WATERMARKS = 3
+
+export const newWatermarkMark = (position: WatermarkMark["position"] = "right"): WatermarkMark => ({
+  id: Math.random().toString(36).slice(2, 9),
+  image: "",
+  position,
+  vertical: "middle",
+  size: "large",
+})
+
 export const DEFAULT_WATERMARK: WatermarkSettings = {
   enabled: false,
-  image: "",
+  marks: [{ ...newWatermarkMark("right"), id: "m1" }],
   opacity: 0.07,
-  size: "large",
-  position: "right",
   sections: ["favourites", "story"],
   monochrome: true,
+}
+
+/** Older saved settings had one picture; turn them into the list form. */
+function normaliseWatermark(raw: Record<string, unknown> | undefined): WatermarkSettings {
+  if (!raw) return DEFAULT_WATERMARK
+  const merged = { ...DEFAULT_WATERMARK, ...(raw as Partial<WatermarkSettings>) }
+  if (!Array.isArray(raw.marks)) {
+    merged.marks = [
+      {
+        id: "m1",
+        image: (raw.image as string) ?? "",
+        position: (raw.position as WatermarkMark["position"]) ?? "right",
+        vertical: "middle",
+        size: (raw.size as WatermarkMark["size"]) ?? "large",
+      },
+    ]
+  }
+  return merged
 }
 
 const watermarkRef = doc(db, "site", "watermark")
@@ -127,7 +160,7 @@ export function useWatermark() {
       onSnapshot(
         watermarkRef,
         (snap) => {
-          setWatermark({ ...DEFAULT_WATERMARK, ...(snap.data() as Partial<WatermarkSettings> | undefined) })
+          setWatermark(normaliseWatermark(snap.data() as Record<string, unknown> | undefined))
           setLoading(false)
         },
         () => setLoading(false)
@@ -139,5 +172,7 @@ export function useWatermark() {
 }
 
 export async function updateWatermark(data: WatermarkSettings) {
-  await setDoc(watermarkRef, data)
+  // Save the list form only (drops the old single-picture fields).
+  const { enabled, marks, opacity, sections, monochrome } = data
+  await setDoc(watermarkRef, { enabled, marks, opacity, sections, monochrome })
 }

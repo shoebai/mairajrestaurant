@@ -5,7 +5,6 @@ import { Link } from "react-router"
 import { useT, useLanguage } from "@/lib/i18n"
 import { useHeroSettings, useHomeText } from "@/lib/firestoreSite"
 import { optimizedImage } from "@/lib/storage"
-import { RESTAURANT_WHATSAPP } from "@/lib/config"
 import hero1 from "@/assets/hero/hero-1.webp"
 import hero2 from "@/assets/hero/hero-2.webp"
 import hero3 from "@/assets/hero/hero-3.webp"
@@ -55,14 +54,13 @@ export default function Hero() {
             >
               {t("heritageExplore")}
             </Link>
-            <a
-              href={`https://wa.me/${RESTAURANT_WHATSAPP}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            {/* Opens the menu so guests pick dishes first; the order is then sent on WhatsApp. */}
+            <Link
+              to="/menu?start=order"
               className="rounded-md border border-cream/70 px-7 py-3.5 font-body text-base font-bold text-cream transition-colors hover:border-saffron hover:text-saffron"
             >
               {t("heritageOrderWhatsApp")}
-            </a>
+            </Link>
           </div>
         </div>
 

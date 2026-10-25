@@ -2,33 +2,45 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Anyone can read the menu, offers, gallery, about content and site
-    // settings — needed so the public website can display them.
-    // Only a signed-in admin (logged into /admin) can create, edit, or delete.
+    // Only these accounts can change the website from /admin.
+    // To add another admin, add their email to the list.
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ['yshoeb52@gmail.com'];
+    }
+
+    // Anyone can read — the public website needs this.
+    // Only an admin can create, edit, or delete.
     match /menuItems/{itemId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     match /offers/{offerId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     match /gallery/{entryId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     match /about/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
-    // Homepage photos and other site settings.
+    // Homepage photos, text, watermark and other site settings.
     match /site/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // Which device each admin is signed in on (one device at a time).
+    // Each admin can only see and change their own record.
+    match /adminSessions/{uid} {
+      allow read, write: if isAdmin() && request.auth.uid == uid;
     }
   }
 }

@@ -6,12 +6,13 @@ import {
   type User,
 } from "firebase/auth"
 import { auth } from "./firebase"
+import { claimSession, clearLocalSession, type LogoutReason } from "./adminSession"
 
 interface AuthContextValue {
   user: User | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
-  logout: () => Promise<void>
+  logout: (reason?: LogoutReason) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -29,10 +30,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password)
+    const cred = await signInWithEmailAndPassword(auth, email, password)
+    // This device becomes the only one signed in to this account.
+    await claimSession(cred.user.uid).catch(() => {})
   }
 
-  const logout = async () => {
+  const logout = async (reason?: LogoutReason) => {
+    clearLocalSession(reason)
     await signOut(auth)
   }
 

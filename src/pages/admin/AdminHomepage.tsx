@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
-import { Images, Loader2, RotateCcw } from "lucide-react"
+import { Images, Loader2, Plus, RotateCcw, Trash2 } from "lucide-react"
 import {
   useHeroSettings,
   updateHeroSettings,
@@ -10,11 +10,14 @@ import {
   useWatermark,
   updateWatermark,
   WATERMARK_SECTIONS,
+  MAX_WATERMARKS,
+  newWatermarkMark,
+  type WatermarkMark,
   type HomeText,
   type HomeTextKey,
   type WatermarkSettings,
 } from "@/lib/firestoreSite"
-import { WatermarkImage } from "@/sections/Watermark"
+import { WatermarkLayer } from "@/sections/Watermark"
 import { translate } from "@/lib/i18n"
 import ImageUploader from "@/components/admin/ImageUploader"
 import PhotoPicker from "@/components/admin/PhotoPicker"
@@ -65,6 +68,15 @@ export default function AdminHomepage() {
   const markDirty = JSON.stringify(mark) !== JSON.stringify(savedMark)
   const onMarkBusy = useCallback((b: boolean) => setMarkUploading(b), [])
   const setM = (patch: Partial<WatermarkSettings>) => setMark((m) => ({ ...m, ...patch }))
+  const setMarkItem = (id: string, patch: Partial<WatermarkMark>) =>
+    setMark((m) => ({ ...m, marks: m.marks.map((x) => (x.id === id ? { ...x, ...patch } : x)) }))
+  const addMarkItem = () =>
+    setMark((m) => {
+      // Put the new one where there isn't one yet.
+      const free = (["left", "center", "right"] as const).find((p) => !m.marks.some((x) => x.position === p)) ?? "center"
+      return { ...m, marks: [...m.marks, newWatermarkMark(free)] }
+    })
+  const removeMarkItem = (id: string) => setMark((m) => ({ ...m, marks: m.marks.filter((x) => x.id !== id) }))
 
   const saveMark = async () => {
     setSavingMark(true)
@@ -208,28 +220,86 @@ export default function AdminHomepage() {
 
         {mark.enabled && (
           <>
-            <div className="flex flex-col gap-2">
-              <span className="font-body text-sm font-semibold text-foreground/80">Picture</span>
-              <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-3">
+              <span className="font-body text-sm font-semibold text-foreground/80">
+                Pictures ({mark.marks.length} of {MAX_WATERMARKS})
+              </span>
+
+              {mark.marks.map((m, n) => (
+                <div key={m.id} className="flex flex-col gap-3 rounded-lg border border-foreground/10 bg-cream/50 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-body text-sm font-bold">Picture {n + 1}</span>
+                    {mark.marks.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeMarkItem(m.id)}
+                        className="flex items-center gap-1 rounded-md px-2 py-1 font-body text-xs font-semibold text-foreground/60 hover:text-destructive"
+                      >
+                        <Trash2 size={13} /> Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setMarkItem(m.id, { image: "" })}
+                      className={`rounded-full border px-4 py-2 font-body text-sm font-semibold ${
+                        !m.image ? "border-teal bg-teal text-cream" : "border-foreground/20 bg-white hover:border-teal"
+                      }`}
+                    >
+                      Mairaj logo
+                    </button>
+                    <span className="font-body text-sm text-foreground/50">or upload your own:</span>
+                  </div>
+                  <ImageUploader
+                    value={m.image ? [m.image] : []}
+                    onChange={(urls) => setMarkItem(m.id, { image: urls[0] ?? "" })}
+                    folder="watermark"
+                    multiple={false}
+                    onBusyChange={onMarkBusy}
+                  />
+
+                  {(
+                    [
+                      ["Across", "position", ["left", "center", "right"]],
+                      ["Up / down", "vertical", ["top", "middle", "bottom"]],
+                      ["Size", "size", ["small", "medium", "large"]],
+                    ] as const
+                  ).map(([label, field, options]) => (
+                    <div key={field} className="flex flex-col gap-1.5">
+                      <span className="font-body text-xs font-semibold text-foreground/60">{label}</span>
+                      <div className="flex gap-2">
+                        {options.map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => setMarkItem(m.id, { [field]: opt } as Partial<WatermarkMark>)}
+                            className={`flex-1 rounded-md border py-2 font-body text-sm capitalize ${
+                              m[field] === opt ? "border-teal bg-teal text-cream" : "border-foreground/20 bg-white hover:border-teal"
+                            }`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+
+              {mark.marks.length < MAX_WATERMARKS && (
                 <button
                   type="button"
-                  onClick={() => setM({ image: "" })}
-                  className={`rounded-full border px-4 py-2 font-body text-sm font-semibold ${
-                    !mark.image ? "border-teal bg-teal text-cream" : "border-foreground/20 hover:border-teal"
-                  }`}
+                  onClick={addMarkItem}
+                  className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-teal/40 py-3 font-body text-sm font-semibold text-teal hover:border-teal hover:bg-teal/5"
                 >
-                  Mairaj logo
+                  <Plus size={16} /> Add another picture
                 </button>
-                <span className="self-center font-body text-sm text-foreground/50">or upload your own:</span>
-              </div>
-              <ImageUploader
-                value={mark.image ? [mark.image] : []}
-                onChange={(urls) => setM({ image: urls[0] ?? "" })}
-                folder="watermark"
-                multiple={false}
-                onBusyChange={onMarkBusy}
-                hint="Best: a PNG with a transparent background, or a simple drawing on white (white areas disappear)."
-              />
+              )}
+              <p className="font-body text-xs text-foreground/50">
+                Tip: a PNG with a transparent background works best. White areas of a picture disappear automatically.
+              </p>
             </div>
 
             <label className="flex flex-col gap-2">
@@ -246,43 +316,6 @@ export default function AdminHomepage() {
               />
               <span className="font-body text-xs text-foreground/50">Keep it faint (5–10%) so text stays easy to read.</span>
             </label>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-2">
-                <span className="font-body text-sm font-semibold text-foreground/80">Size</span>
-                <div className="flex gap-2">
-                  {(["small", "medium", "large"] as const).map((size) => (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => setM({ size })}
-                      className={`flex-1 rounded-md border py-2 font-body text-sm capitalize ${
-                        mark.size === size ? "border-teal bg-teal text-cream" : "border-foreground/20 hover:border-teal"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <span className="font-body text-sm font-semibold text-foreground/80">Position</span>
-                <div className="flex gap-2">
-                  {(["left", "center", "right"] as const).map((position) => (
-                    <button
-                      key={position}
-                      type="button"
-                      onClick={() => setM({ position })}
-                      className={`flex-1 rounded-md border py-2 font-body text-sm capitalize ${
-                        mark.position === position ? "border-teal bg-teal text-cream" : "border-foreground/20 hover:border-teal"
-                      }`}
-                    >
-                      {position}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
 
             <div className="flex flex-col gap-2">
               <span className="font-body text-sm font-semibold text-foreground/80">Show behind</span>
@@ -321,7 +354,7 @@ export default function AdminHomepage() {
             <div className="flex flex-col gap-2">
               <span className="font-body text-sm font-semibold text-foreground/80">Preview</span>
               <div className="relative h-56 overflow-hidden rounded-lg border border-foreground/10 bg-cream">
-                <WatermarkImage settings={mark} />
+                <WatermarkLayer settings={mark} />
                 <div className="relative z-[1] flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
                   <p className="font-body text-[10px] font-bold uppercase tracking-[0.2em] text-gold">From the tandoor & the kadai</p>
                   <p className="font-display text-3xl">Dishes guests come back for</p>

@@ -46,6 +46,11 @@ const dict: Dict = {
   menuViewOrder: { en: "View order", ar: "عرض الطلب" },
   menuTotal: { en: "Total", ar: "المجموع" },
   menuResults: { en: "results", ar: "نتيجة" },
+  menuOrderHint: {
+    en: "Tap + to add dishes, then tap “View order” to send your order on WhatsApp.",
+    ar: "اضغط + لإضافة الأطباق، ثم اضغط «عرض الطلب» لإرسال طلبك عبر واتساب.",
+  },
+  menuHintClose: { en: "Close tip", ar: "إغلاق التلميح" },
   menuClearSearch: { en: "Clear search", ar: "مسح البحث" },
   menuScrollLeft: { en: "Scroll categories left", ar: "تمرير الأقسام لليسار" },
   menuScrollRight: { en: "Scroll categories right", ar: "تمرير الأقسام لليمين" },

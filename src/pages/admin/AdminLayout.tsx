@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link, Outlet, useLocation } from "react-router"
 import { Toaster } from "sonner"
+import SessionGuard from "@/components/admin/SessionGuard"
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -148,6 +149,7 @@ export default function AdminLayout() {
       </main>
 
       <Toaster position="bottom-center" richColors closeButton />
+      <SessionGuard />
     </div>
   )
 }

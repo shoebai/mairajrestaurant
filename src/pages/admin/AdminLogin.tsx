@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Navigate, useNavigate } from "react-router"
 import { useAuth } from "@/lib/auth"
+import { takeLogoutReason } from "@/lib/adminSession"
 import logo from "@/assets/mairaj-logo.jpeg"
 
 export default function AdminLogin() {
@@ -10,6 +11,12 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [submitting, setSubmitting] = useState(false)
+  const [notice] = useState(() => {
+    const reason = takeLogoutReason()
+    if (reason === "other-device") return "You were signed out because this account signed in on another device."
+    if (reason === "expired") return "You were signed out because your 1-hour session ended."
+    return ""
+  })
 
   if (user) return <Navigate to="/admin" replace />
 
@@ -34,6 +41,12 @@ export default function AdminLogin() {
           <img src={logo} alt="Mairaj" className="w-16 h-16 rounded-full object-cover mb-4" />
           <h1 className="font-display text-3xl text-cream">Mairaj Admin</h1>
         </div>
+
+        {notice && (
+          <p role="status" className="mb-5 rounded-md border border-saffron/40 bg-saffron/15 px-4 py-3 font-body text-sm text-cream">
+            {notice}
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
