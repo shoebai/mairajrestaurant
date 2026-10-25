@@ -236,7 +236,7 @@ export default function MenuPage() {
       {/* Search + categories, sticks under the navbar */}
       <div
         className="sticky z-30 border-b border-foreground/10 bg-cream/95 shadow-[0_8px_20px_-14px_rgba(27,42,43,0.35)] backdrop-blur"
-        style={{ top: "var(--nav-h, 72px)" }}
+        style={{ top: "calc(var(--nav-h, 72px) - 1px)" }}
       >
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:gap-5">
           {/* Search */}

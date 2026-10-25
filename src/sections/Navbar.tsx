@@ -33,11 +33,19 @@ export default function Navbar() {
   useEffect(() => {
     const el = headerRef.current
     if (!el || typeof ResizeObserver === "undefined") return
-    const ro = new ResizeObserver(() =>
-      document.documentElement.style.setProperty("--nav-h", `${el.offsetHeight}px`)
-    )
-    ro.observe(el)
-    return () => ro.disconnect()
+    const update = () =>
+      document.documentElement.style.setProperty("--nav-h", `${el.getBoundingClientRect().height}px`)
+    // The bar gets slimmer on scroll by changing its padding, which a normal
+    // size observer doesn't notice, so watch the border box and the end of the
+    // shrink animation too.
+    const ro = new ResizeObserver(update)
+    ro.observe(el, { box: "border-box" })
+    el.addEventListener("transitionend", update)
+    update()
+    return () => {
+      ro.disconnect()
+      el.removeEventListener("transitionend", update)
+    }
   }, [])
 
   // Close the phone menu whenever the page or section changes.
