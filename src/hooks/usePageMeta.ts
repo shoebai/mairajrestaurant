@@ -36,12 +36,12 @@ export const PAGE_META = {
     en: {
       title: "Mairaj Restaurant | Hyderabadi Biryani & Indian Food in Madinah | مطعم معراج",
       description:
-        "Hyderabadi biryani, tandoori and Indian curries in Madinah. Open daily 1 PM – 12 AM. Order on WhatsApp for pickup or delivery.",
+        "Hyderabadi biryani, tandoori and Indian curries in Madinah, close to Al-Masjid an-Nabawi. Open daily 1 PM – 12 AM. Order on WhatsApp for pickup or delivery.",
     },
     ar: {
       title: "مطعم معراج | برياني حيدر أبادي ومأكولات هندية في المدينة المنورة",
       description:
-        "برياني حيدر أبادي ومشويات التندور والمأكولات الهندية في المدينة المنورة. مفتوح يومياً من ١ ظهراً حتى ١٢ منتصف الليل. اطلب عبر واتساب.",
+        "برياني حيدر أبادي ومشويات التندور والمأكولات الهندية في المدينة المنورة، بالقرب من المسجد النبوي. مفتوح يومياً من ١ ظهراً حتى ١٢ منتصف الليل. اطلب عبر واتساب.",
     },
   },
   menu: {

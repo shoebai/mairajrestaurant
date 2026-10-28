@@ -1,10 +1,12 @@
 import { Link } from "react-router"
-import { Instagram, Facebook, Phone, Mail } from "lucide-react"
+import { Instagram, Facebook, Phone, Mail, MapPin } from "lucide-react"
 import logo from "@/assets/mairaj-logo.jpeg"
-import { useT } from "@/lib/i18n"
+import { useT, useLanguage } from "@/lib/i18n"
+import { RESTAURANT_ADDRESS, RESTAURANT_ADDRESS_AR, RESTAURANT_LANDMARK, RESTAURANT_LANDMARK_AR, RESTAURANT_MAP_URL } from "@/lib/config"
 
 export default function Footer() {
   const t = useT()
+  const { lang } = useLanguage()
 
   return (
     <footer className="bg-foreground text-cream border-t border-cream/10">
@@ -19,6 +21,19 @@ export default function Footer() {
           <p className="font-body text-cream/50 text-sm leading-relaxed">
             {t("footerTagline")}
           </p>
+          <a
+            href={RESTAURANT_MAP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 flex gap-2 font-body text-sm leading-relaxed text-cream/70 transition-colors hover:text-gold"
+          >
+            <MapPin size={16} className="mt-0.5 shrink-0 text-gold" />
+            <span>
+              {lang === "ar" ? RESTAURANT_ADDRESS_AR : RESTAURANT_ADDRESS}
+              <br />
+              <span className="text-cream/50">{lang === "ar" ? RESTAURANT_LANDMARK_AR : RESTAURANT_LANDMARK}</span>
+            </span>
+          </a>
         </div>
 
         <div>

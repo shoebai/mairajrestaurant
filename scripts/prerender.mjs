@@ -83,9 +83,10 @@ const nav = `<nav><a href="/">Home · ${ar("الرئيسية")}</a> | <a href="/
   "القائمة"
 )}</a> | <a href="/about">About · ${ar("من نحن")}</a></nav>`
 
-const contact = `<p>${esc(HOURS)} · ${ar(HOURS_AR)}</p><p>Call or WhatsApp: <a href="tel:${PHONE}">${PHONE_DISPLAY}</a></p><p>Madinah, Saudi Arabia · ${ar(
-  "المدينة المنورة، المملكة العربية السعودية"
-)}</p>`
+const ADDRESS = "Sayed Al Shouhada, Al Masani, Madinah 42313 — near Shohada Street, close to Al-Masjid an-Nabawi"
+const ADDRESS_AR = "سيد الشهداء، المصانع، المدينة المنورة 42313 — بالقرب من شارع الشهداء، بالقرب من المسجد النبوي"
+
+const contact = `<p>${esc(HOURS)} · ${ar(HOURS_AR)}</p><p>Call or WhatsApp: <a href="tel:${PHONE}">${PHONE_DISPLAY}</a></p><address>${esc(ADDRESS)}<br>${ar(ADDRESS_AR)}</address>`
 
 const wrap = (inner) => `<div class="seo-snapshot">${inner}</div>`
 
@@ -112,8 +113,8 @@ function homeSnapshot({ items, text }) {
 <p lang="ar" dir="rtl">${esc(titleAr)}</p>
 <p>${esc(body)}</p>
 <p lang="ar" dir="rtl">${esc(bodyAr)}</p>
-<p>Hyderabadi biryani, tandoori and Indian food in Madinah — dine in, takeaway and WhatsApp orders.</p>
-<p lang="ar" dir="rtl">برياني حيدر أبادي ومشويات التندور والمأكولات الهندية في المدينة المنورة — تناول في المطعم، سفري، وطلبات واتساب.</p>
+<p>Hyderabadi biryani, tandoori and Indian food in Madinah, a short walk from Al-Masjid an-Nabawi — dine in, takeaway and WhatsApp orders.</p>
+<p lang="ar" dir="rtl">برياني حيدر أبادي ومشويات التندور والمأكولات الهندية في المدينة المنورة، بالقرب من المسجد النبوي — تناول في المطعم، سفري، وطلبات واتساب.</p>
 ${contact}
 ${featured.length ? `<h2>Dishes guests come back for · ${ar("أطباق يعود الضيوف من أجلها")}</h2>${dishList(featured)}` : ""}
 ${biryanis.length ? `<h2>Hyderabadi biryani · ${ar("برياني حيدر أبادي")}</h2>${dishList(biryanis)}` : ""}
@@ -219,7 +220,7 @@ export const PAGES = {
   "/": {
     title: "Mairaj Restaurant | Hyderabadi Biryani & Indian Food in Madinah | مطعم معراج",
     description:
-      "Hyderabadi biryani, tandoori and Indian curries in Madinah. Open daily 1 PM – 12 AM. Order on WhatsApp for pickup or delivery. مطعم معراج: برياني حيدر أبادي في المدينة المنورة.",
+      "Hyderabadi biryani, tandoori and Indian curries in Madinah, close to Al-Masjid an-Nabawi. Open daily 1 PM – 12 AM. Order on WhatsApp. مطعم معراج: برياني حيدر أبادي بالقرب من المسجد النبوي.",
   },
   "/menu": {
     title: "Menu — Hyderabadi Biryani, Tandoori & Curries in Madinah | Mairaj Restaurant",

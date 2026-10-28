@@ -1,14 +1,20 @@
 import { MapPin, Phone, Clock } from "lucide-react"
 import { useReveal } from "@/hooks/useReveal"
 import { useT, useLanguage } from "@/lib/i18n"
+import {
+  RESTAURANT_ADDRESS,
+  RESTAURANT_ADDRESS_AR,
+  RESTAURANT_LANDMARK,
+  RESTAURANT_LANDMARK_AR,
+} from "@/lib/config"
 
 const branches = [
   {
     key: "main",
     name: "Mairaj Restaurant — Since 2001",
     nameAr: "مطعم معراج — منذ 2001",
-    address: "Madinah, Saudi Arabia",
-    addressAr: "المدينة المنورة، المملكة العربية السعودية",
+    address: `${RESTAURANT_ADDRESS} — ${RESTAURANT_LANDMARK}`,
+    addressAr: `${RESTAURANT_ADDRESS_AR} — ${RESTAURANT_LANDMARK_AR}`,
     phone: "+966 58 074 8325",
     hours: "Daily · 1:00 PM – 12:00 AM",
     hoursAr: "يومياً · 1:00 ظهراً – 12:00 منتصف الليل",
