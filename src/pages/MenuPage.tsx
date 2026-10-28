@@ -22,6 +22,8 @@ import { useSearchParams } from "react-router"
 import { useT, useLanguage } from "@/lib/i18n"
 import { RESTAURANT_WHATSAPP } from "@/lib/config"
 import { optimizedImage } from "@/lib/storage"
+import { useImageTones } from "@/hooks/useImageTone"
+import { usePageMeta, PAGE_META } from "@/hooks/usePageMeta"
 
 type OrderType = "pickup" | "delivery"
 type PinnedLocation = { lat: number; lng: number; accuracy: number }
@@ -33,6 +35,7 @@ const priceOf = (item?: MenuItem) => parseFloat(item?.price ?? "") || 0
 
 export default function MenuPage() {
   const { items, loading } = useMenuItems()
+  usePageMeta("/menu", PAGE_META.menu)
   const t = useT()
   const { lang } = useLanguage()
   const ar = lang === "ar"
@@ -142,6 +145,11 @@ export default function MenuPage() {
   }
 
   const resultCount = matching.length
+
+  // Which dish photos have plain white backgrounds (those blend into the page).
+  const tones = useImageTones(
+    useMemo(() => items.map((i) => i.images?.[0]).filter((u): u is string => !!u), [items])
+  )
 
   const byName = useMemo(() => new Map(items.map((i) => [i.name, i])), [items])
   const totalPrice = Object.entries(order).reduce((sum, [name, q]) => sum + q * priceOf(byName.get(name)), 0)
@@ -389,9 +397,22 @@ export default function MenuPage() {
                         <button
                           onClick={() => openImages(item)}
                           aria-label={t("viewPhoto")}
-                          className="arch relative h-[72px] w-[72px] shrink-0 overflow-hidden border border-foreground/10 bg-white transition-colors hover:border-gold"
+                          className={`arch relative h-[72px] w-[72px] shrink-0 overflow-hidden border transition-colors ${
+                            tones[images[0]] === "light"
+                              ? "border-transparent bg-cream hover:border-gold/40"
+                              : "border-foreground/10 bg-white hover:border-gold"
+                          }`}
                         >
-                          <img src={optimizedImage(images[0], 200)} alt={name} loading="lazy" className="h-full w-full object-cover" />
+                          <img
+                            src={optimizedImage(images[0], 200)}
+                            alt={name}
+                            loading="lazy"
+                            className={
+                              tones[images[0]] === "light"
+                                ? "h-full w-full object-contain p-0.5 mix-blend-multiply"
+                                : "h-full w-full object-cover"
+                            }
+                          />
                           {images.length > 1 && (
                             <span className="absolute bottom-1 right-1 rounded bg-black/60 px-1 font-body text-[10px] leading-tight text-white">
                               +{images.length - 1}

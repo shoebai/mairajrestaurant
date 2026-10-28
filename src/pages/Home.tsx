@@ -1,5 +1,6 @@
 import Navbar from "@/sections/Navbar"
 import Hero from "@/sections/Hero"
+import { usePageMeta, PAGE_META } from "@/hooks/usePageMeta"
 import InfoStrip from "@/sections/InfoStrip"
 import BiryaniHouse from "@/sections/BiryaniHouse"
 import CartBar from "@/sections/CartBar"
@@ -12,6 +13,7 @@ import Reservation from "@/sections/Reservation"
 import Footer from "@/sections/Footer"
 
 export default function Home() {
+  usePageMeta("/", PAGE_META.home)
   return (
     <>
       <Navbar />

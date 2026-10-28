@@ -4,6 +4,11 @@ export const RESTAURANT_WHATSAPP = "966580748325"
 export const RESTAURANT_PHONE_DISPLAY = "+966 58 074 8325"
 export const RESTAURANT_MAP_URL = "https://maps.app.goo.gl/TC1TU7UGmo3D5pMu8"
 
+// The restaurant's name exactly as on Google Maps. Keep these identical
+// everywhere (website, Google Maps, delivery apps) — Google uses the match.
+export const RESTAURANT_NAME = "Mairaj Restaurant"
+export const RESTAURANT_NAME_AR = "مطعم معراج"
+
 // ── Developer tools ────────────────────────────────────────────────────
 // Only these admin logins see developer-only pages such as "Import menu".
 // Restaurant staff logging in with any other email won't see them.

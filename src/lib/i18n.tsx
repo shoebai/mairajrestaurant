@@ -106,7 +106,7 @@ const dict: Dict = {
   heroTitleLine2: { en: "of spice", ar: "من التوابل" },
   heroBody: {
     en: "Mairaj brings the slow-cooked traditions of Indian kitchens to Madinah — hand-ground spice, tandoor smoke, and recipes that have never needed updating.",
-    ar: "يقدّم مائرج تقاليد المطبخ الهندي الأصيلة إلى المدينة المنورة — توابل مطحونة يدوياً، ودخان التندور، ووصفات لم تحتج يوماً للتغيير.",
+    ar: "يقدّم معراج تقاليد المطبخ الهندي الأصيلة إلى المدينة المنورة — توابل مطحونة يدوياً، ودخان التندور، ووصفات لم تحتج يوماً للتغيير.",
   },
   heroViewMenu: { en: "View Menu", ar: "عرض القائمة" },
   heroReserveTable: { en: "Reserve a Table", ar: "احجز طاولة" },
@@ -117,7 +117,7 @@ const dict: Dict = {
   storyTitleEmphasis: { en: "household recipe", ar: "وصفة بيتية" },
   storyBody: {
     en: "Mairaj began as a single kitchen and a belief that good food shouldn't be rushed. Our spices are ground fresh each morning, our bread comes straight from the tandoor, and our curries simmer for as long as they need to — not a minute less. Today, our kitchen in Madinah carries that same tradition forward, dish by dish, for guests who know the difference.",
-    ar: "بدأ مائرج كمطبخ واحد وإيمان بأن الطعام الجيد لا يجب أن يُستعجل. توابلنا تُطحن طازجة كل صباح، وخبزنا يأتي مباشرة من التندور، وأطباقنا تُطهى ببطء للوقت الذي تحتاجه تماماً. اليوم، يواصل مطبخنا في المدينة المنورة هذا التقليد نفسه، طبقاً بعد طبق، لضيوف يعرفون الفرق.",
+    ar: "بدأ معراج كمطبخ واحد وإيمان بأن الطعام الجيد لا يجب أن يُستعجل. توابلنا تُطحن طازجة كل صباح، وخبزنا يأتي مباشرة من التندور، وأطباقنا تُطهى ببطء للوقت الذي تحتاجه تماماً. اليوم، يواصل مطبخنا في المدينة المنورة هذا التقليد نفسه، طبقاً بعد طبق، لضيوف يعرفون الفرق.",
   },
   statBranches: { en: "Branch in Madinah", ar: "فرع في المدينة المنورة" },
   statDishes: { en: "Signature Dishes", ar: "طبقاً مميزاً" },
@@ -127,7 +127,7 @@ const dict: Dict = {
   menuTeaserTitle: { en: "A few house favourites", ar: "بعض أشهى أطباقنا" },
   seeFullMenu: { en: "See Full Menu", ar: "عرض القائمة الكاملة" },
 
-  galleryEyebrow: { en: "Inside Mairaj", ar: "داخل مائرج" },
+  galleryEyebrow: { en: "Inside Mairaj", ar: "داخل معراج" },
   galleryTitle: { en: "A glimpse of the kitchen", ar: "لمحة من المطبخ" },
   galleryIntro: {
     en: "A closer look at the kitchen, the fire, and the room where it all comes together.",
@@ -135,7 +135,7 @@ const dict: Dict = {
   },
 
   findUs: { en: "Find Us", ar: "موقعنا" },
-  visitMairaj: { en: "Visit Mairaj", ar: "زوروا مائرج" },
+  visitMairaj: { en: "Visit Mairaj", ar: "زوروا معراج" },
   openInMaps: { en: "Open in Google Maps", ar: "افتح في خرائط جوجل" },
   secondBranch: { en: "Second Branch", ar: "الفرع الثاني" },
   openingSoon: { en: "Opening soon — details to follow", ar: "قريباً — التفاصيل لاحقاً" },
@@ -179,10 +179,10 @@ const dict: Dict = {
   contact: { en: "Contact", ar: "تواصل معنا" },
 
   offersEyebrow: { en: "Special Offers", ar: "عروض خاصة" },
-  offersTitle: { en: "This week at Mairaj", ar: "هذا الأسبوع في مائرج" },
+  offersTitle: { en: "This week at Mairaj", ar: "هذا الأسبوع في معراج" },
 
   aboutEyebrow: { en: "About Us", ar: "من نحن" },
-  aboutTitle: { en: "Mairaj Restaurant", ar: "مطعم مائرج" },
+  aboutTitle: { en: "Mairaj Restaurant", ar: "مطعم معراج" },
   aboutStoryTitle: { en: "Our Story", ar: "قصتنا" },
   aboutServicesTitle: { en: "Our Services", ar: "خدماتنا" },
   aboutStaffTitle: { en: "Our Team", ar: "فريقنا" },
@@ -210,14 +210,30 @@ const LanguageContext = createContext<LanguageContextValue | null>(null)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>(() => {
-    const saved = typeof window !== "undefined" ? localStorage.getItem("mairaj-lang") : null
-    return saved === "ar" ? "ar" : "en"
+    if (typeof window === "undefined") return "en"
+    // 1. A link like mairajhyd.com/?lang=ar (used for the Arabic version in Google)
+    const fromUrl = new URLSearchParams(window.location.search).get("lang")
+    if (fromUrl === "ar" || fromUrl === "en") return fromUrl
+    // 2. The visitor's own earlier choice
+    let saved: string | null = null
+    try {
+      saved = localStorage.getItem("mairaj-lang")
+    } catch {
+      // storage blocked
+    }
+    if (saved === "ar" || saved === "en") return saved
+    // 3. Phones set to Arabic get the Arabic site first
+    return navigator.language?.toLowerCase().startsWith("ar") ? "ar" : "en"
   })
 
   useEffect(() => {
     document.documentElement.lang = lang
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr"
-    localStorage.setItem("mairaj-lang", lang)
+    try {
+      localStorage.setItem("mairaj-lang", lang)
+    } catch {
+      // storage blocked
+    }
   }, [lang])
 
   const toggleLang = () => setLang((l) => (l === "en" ? "ar" : "en"))

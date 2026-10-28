@@ -4,6 +4,10 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  # Rebuild every night so search engines see menu changes made in the admin
+  # panel (the readable copy of the menu is made at build time).
+  schedule:
+    - cron: "0 0 * * *" # 03:00 Madinah time
 
 permissions:
   contents: read
@@ -37,14 +41,11 @@ jobs:
           VITE_CLOUDINARY_CLOUD_NAME: ${{ vars.VITE_CLOUDINARY_CLOUD_NAME }}
           VITE_CLOUDINARY_UPLOAD_PRESET: ${{ vars.VITE_CLOUDINARY_UPLOAD_PRESET }}
 
-      # Give each page its own index.html so Google sees /menu and /about as
-      # real pages (status 200) instead of "not found" redirects.
-      - name: Create page entry points
-        run: |
-          for page in menu about; do
-            mkdir -p dist/$page
-            cp dist/index.html dist/$page/index.html
-          done
+      # Give each page its own index.html (real pages for Google, not "not
+      # found" redirects), with its own title and a readable copy of the
+      # live menu in English and Arabic. See scripts/prerender.mjs.
+      - name: Prepare pages for search engines
+        run: node scripts/prerender.mjs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

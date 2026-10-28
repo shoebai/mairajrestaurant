@@ -1,18 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://mairajhyd.com/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mairajhyd.com/" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mairajhyd.com/?lang=ar" />
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://mairajhyd.com/menu</loc>
+    <loc>https://mairajhyd.com/?lang=ar</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mairajhyd.com/" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mairajhyd.com/?lang=ar" />
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://mairajhyd.com/menu</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mairajhyd.com/menu" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mairajhyd.com/menu?lang=ar" />
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mairajhyd.com/menu?lang=ar</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mairajhyd.com/menu" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mairajhyd.com/menu?lang=ar" />
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://mairajhyd.com/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mairajhyd.com/about" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mairajhyd.com/about?lang=ar" />
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mairajhyd.com/about?lang=ar</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mairajhyd.com/about" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mairajhyd.com/about?lang=ar" />
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>

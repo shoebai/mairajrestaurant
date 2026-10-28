@@ -1,10 +1,12 @@
 import { MapPin, Phone, Clock } from "lucide-react"
 import Navbar from "@/sections/Navbar"
+import { usePageMeta, PAGE_META } from "@/hooks/usePageMeta"
 import Footer from "@/sections/Footer"
 import { useT, useLanguage } from "@/lib/i18n"
 import { useAbout } from "@/lib/firestoreAbout"
 
 export default function AboutPage() {
+  usePageMeta("/about", PAGE_META.about)
   const t = useT()
   const { lang } = useLanguage()
   const { about, loading } = useAbout()

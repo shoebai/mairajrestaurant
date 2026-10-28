@@ -6,7 +6,7 @@ const branches = [
   {
     key: "main",
     name: "Mairaj Restaurant — Since 2001",
-    nameAr: "مطعم مائرج — منذ 2001",
+    nameAr: "مطعم معراج — منذ 2001",
     address: "Madinah, Saudi Arabia",
     addressAr: "المدينة المنورة، المملكة العربية السعودية",
     phone: "+966 58 074 8325",
