@@ -154,7 +154,15 @@ export function optimizedImage(url: string | undefined, width: number): string {
 // Cost: each removal counts as 75 transformations. The free plan includes
 // about 25,000 per month, which is plenty for a restaurant menu.
 
-const WHITE_BG = "e_background_removal/b_white,f_jpg,q_90"
+// Remove the background → trim empty space → centre on a white square →
+// add an even white margin all round (so the dish never touches the edge).
+const WHITE_BG = [
+  "e_background_removal",
+  "e_trim",
+  "c_pad,ar_1:1,w_1000,b_white",
+  "c_lpad,w_1160,h_1160,b_white",
+  "f_jpg,q_90",
+].join("/")
 
 /** Finds the Cloudinary public ID inside a delivery URL. */
 function publicIdOf(url: string): string | null {

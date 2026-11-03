@@ -37,10 +37,13 @@ function detect(url: string): Promise<ImageTone> {
               const i = (y * size + x) * 4
               const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3]
               total++
-              if (a < 30 || (r > 225 && g > 225 && b > 225)) light++
+              const max = Math.max(r, g, b)
+              const min = Math.min(r, g, b)
+              // Near-white or very light grey/cream, without strong colour
+              if (a < 30 || (min > 205 && max - min < 28)) light++
             }
           }
-          if (light / total > 0.8) tone = "light"
+          if (light / total > 0.7) tone = "light"
         }
       } catch {
         // The browser wouldn't let us read the pixels: treat as a normal photo.
