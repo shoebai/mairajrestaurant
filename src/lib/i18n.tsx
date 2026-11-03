@@ -20,7 +20,7 @@ const dict: Dict = {
     en: "Rice and meat sealed together and slow-cooked on dum, the way Hyderabadi kitchens have done it for generations.",
     ar: "أرز ولحم يُغلقان معاً ويُطهيان على نار هادئة بطريقة الدم، كما تفعل مطابخ حيدر أباد منذ أجيال.",
   },
-  heritageSecondLine: { en: "برياني حيدر أبادي على الطريقة الأصيلة", ar: "" },
+  heritageSecondLine: { en: "", ar: "" },
   heritageExplore: { en: "Explore the menu", ar: "تصفح القائمة" },
   heritageOrderWhatsApp: { en: "Order on WhatsApp", ar: "اطلب عبر واتساب" },
   infoEveryDay: { en: "Every day", ar: "يومياً" },

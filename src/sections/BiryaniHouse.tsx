@@ -27,15 +27,9 @@ export default function BiryaniHouse() {
         <ul className="flex-1">
           {biryanis.map((b) => {
             const name = lang === "ar" && b.nameAr ? b.nameAr : b.name
-            const other = lang === "ar" ? "" : b.nameAr
             return (
               <li key={b.id} className="flex items-baseline gap-3 border-b border-foreground/15 py-5">
                 <span className="font-display text-2xl">{name}</span>
-                {other && (
-                  <span dir="rtl" className="hidden font-arabic text-lg text-foreground/55 sm:inline">
-                    {other}
-                  </span>
-                )}
                 <span className="menu-dots" />
                 <span className="font-body text-xl font-bold text-teal">{b.price}</span>
               </li>

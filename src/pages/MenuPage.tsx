@@ -227,19 +227,13 @@ export default function MenuPage() {
 
       {/* Title band */}
       <header className="bg-teal pt-24 text-cream md:pt-28">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-4 px-6 pb-14 pt-10 md:pb-16">
+        <div className="mx-auto flex max-w-6xl px-6 pb-14 pt-10 md:pb-16">
           <div className="flex flex-col gap-2">
             <p className="font-body text-xs font-bold uppercase tracking-[0.2em] text-saffron">
               {items.length > 0 ? `${items.length} ${t("menuDishes")}` : t("fullMenuEyebrow")}
             </p>
             <h1 className="font-display text-5xl md:text-7xl">{t("menuPageTitle")}</h1>
           </div>
-          <p
-            dir={ar ? "ltr" : "rtl"}
-            className={`${ar ? "font-display" : "font-arabic"} text-3xl text-cream/90 md:text-4xl`}
-          >
-            {t("menuPageOther")}
-          </p>
         </div>
       </header>
 
@@ -376,17 +370,11 @@ export default function MenuPage() {
             <section key={section.name} className="pt-14">
               <div className="mb-2 flex flex-wrap items-baseline justify-between gap-3 border-b-2 border-teal pb-3">
                 <h2 className="font-display text-3xl md:text-4xl">{label(section.name, section.nameAr)}</h2>
-                {!ar && section.nameAr && (
-                  <span dir="rtl" className="font-arabic text-2xl text-foreground/55">
-                    {section.nameAr}
-                  </span>
-                )}
               </div>
 
               <ul className="grid lg:grid-cols-2 lg:gap-x-14">
                 {section.items.map((item) => {
                   const name = label(item.name, item.nameAr)
-                  const other = ar ? "" : item.nameAr
                   const desc = label(item.desc ?? "", item.descAr)
                   const qty = order[item.name] ?? 0
                   const images = item.images ?? []
@@ -436,11 +424,6 @@ export default function MenuPage() {
                           <span className="menu-dots min-w-4" />
                           <span className="shrink-0 font-body text-lg font-bold text-teal">{item.price}</span>
                         </div>
-                        {other && (
-                          <p dir="rtl" className="text-left font-arabic text-lg leading-snug text-foreground/55">
-                            {other}
-                          </p>
-                        )}
                         {desc && <p className="mt-0.5 font-body text-sm text-foreground/60">{desc}</p>}
                       </div>
 
