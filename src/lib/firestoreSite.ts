@@ -176,3 +176,43 @@ export async function updateWatermark(data: WatermarkSettings) {
   const { enabled, marks, opacity, sections, monochrome } = data
   await setDoc(watermarkRef, { enabled, marks, opacity, sections, monochrome })
 }
+
+// ── How offers appear on the homepage ──────────────────────────────────
+
+export interface OffersDisplay {
+  /** "cards" = a grid of offer cards; "banner" = a slowly sliding strip. */
+  layout: "cards" | "banner"
+  /** Which way the banner moves across the screen. */
+  direction: "to-left" | "to-right"
+  speed: "slow" | "medium" | "fast"
+}
+
+export const DEFAULT_OFFERS_DISPLAY: OffersDisplay = {
+  layout: "cards",
+  direction: "to-left",
+  speed: "slow",
+}
+
+const offersDisplayRef = doc(db, "site", "offersDisplay")
+
+export function useOffersDisplay() {
+  const [display, setDisplay] = useState<OffersDisplay>(DEFAULT_OFFERS_DISPLAY)
+  const [loading, setLoading] = useState(true)
+  useEffect(
+    () =>
+      onSnapshot(
+        offersDisplayRef,
+        (snap) => {
+          setDisplay({ ...DEFAULT_OFFERS_DISPLAY, ...(snap.data() as Partial<OffersDisplay> | undefined) })
+          setLoading(false)
+        },
+        () => setLoading(false)
+      ),
+    []
+  )
+  return { display, loading }
+}
+
+export async function updateOffersDisplay(data: OffersDisplay) {
+  await setDoc(offersDisplayRef, data)
+}

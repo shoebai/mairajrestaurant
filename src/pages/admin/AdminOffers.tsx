@@ -4,6 +4,7 @@ import { Plus, Trash2, Loader2, Tag } from "lucide-react"
 import { useOffers, addOffer, updateOffer, deleteOffer, type Offer } from "@/lib/firestoreOffers"
 import { optimizedImage } from "@/lib/storage"
 import ImageUploader from "@/components/admin/ImageUploader"
+import OffersDisplaySettings from "@/components/admin/OffersDisplaySettings"
 import { AdminModal, BilingualRow, Field, PageHeader, PrimaryButton, Toggle } from "@/components/admin/AdminUI"
 
 const emptyForm = {
@@ -97,6 +98,8 @@ export default function AdminOffers() {
           </PrimaryButton>
         }
       />
+
+      <OffersDisplaySettings />
 
       {loading ? (
         <p className="flex items-center gap-2 font-body text-foreground/50">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { optimizedImage } from "@/lib/storage"
 
 /**
  * "light" = a photo on a plain white or near-white background (typical dish
@@ -48,7 +49,7 @@ function detect(url: string): Promise<ImageTone> {
       resolve(tone)
     }
     img.onerror = () => resolve("photo")
-    img.src = url
+    img.src = optimizedImage(url, 48)
   })
 }
 

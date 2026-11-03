@@ -75,6 +75,33 @@
   .font-arabic {
     font-family: 'Amiri', 'Noto Kufi Arabic', serif;
   }
+  /* Offers sliding banner: the track holds the offers twice and moves by
+     half its width, so the loop is seamless. */
+  @keyframes offers-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .offers-marquee {
+    animation: offers-marquee var(--marquee-duration, 60s) linear infinite;
+  }
+  .offers-marquee[data-direction="to-right"] {
+    animation-direction: reverse;
+  }
+  .offers-marquee-wrap:hover .offers-marquee,
+  .offers-marquee-wrap:focus-within .offers-marquee,
+  .offers-marquee-wrap[data-paused="true"] .offers-marquee {
+    animation-play-state: paused;
+  }
+  .offers-marquee-wrap {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  }
+  /* People who turn off motion get a row they can swipe instead. */
+  @media (prefers-reduced-motion: reduce) {
+    .offers-marquee { animation: none !important; }
+    .offers-marquee-wrap { overflow-x: auto; }
+  }
+
   /* Charminar-style arch for photo frames */
   .arch {
     border-radius: 999px 999px 0.5rem 0.5rem;
