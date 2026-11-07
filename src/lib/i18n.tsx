@@ -14,6 +14,8 @@ const dict: Dict = {
   navReserve: { en: "Reserve", ar: "احجز طاولة" },
   navReserveTable: { en: "Reserve a table", ar: "احجز طاولة" },
   brandArabic: { en: "مطعم معراج", ar: "Mairaj Restaurant" },
+  brandName: { en: "Mairaj Restaurant", ar: "مطعم معراج" },
+  brandCuisine: { en: "Indian and Chinese Cuisine", ar: "مأكولات هندية وصينية" },
   heritageEyebrow: { en: "From Hyderabad, with patience", ar: "من حيدر أباد، بكل صبر" },
   heritageTitle: { en: "The old way of making biryani, in Madinah.", ar: "البرياني على الطريقة الأصيلة، في المدينة المنورة." },
   heritageBody: {

@@ -108,12 +108,13 @@ export default function Navbar() {
               }`}
             />
             <span className="leading-none">
-              <span
-                className="block font-display text-2xl text-cream md:text-[1.7rem]"
-              >
-                Mairaj
+              {/* 26px name / 15px line below (a little smaller on narrow phones so it fits) */}
+              <span className="block whitespace-nowrap font-display text-[21px] leading-tight text-cream min-[400px]:text-[23px] sm:text-[26px]">
+                {t("brandName")}
               </span>
-              <span className="mt-1 block font-arabic text-[0.95rem] leading-none text-saffron">{t("brandArabic")}</span>
+              <span className="mt-0.5 block whitespace-nowrap font-body text-[12px] font-medium leading-tight text-saffron min-[400px]:text-[13px] sm:text-[15px]">
+                {t("brandCuisine")}
+              </span>
             </span>
           </Link>
 

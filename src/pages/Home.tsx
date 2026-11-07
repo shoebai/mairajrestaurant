@@ -7,6 +7,7 @@ import CartBar from "@/sections/CartBar"
 import Story from "@/sections/Story"
 import MenuTeaser from "@/sections/MenuTeaser"
 import Offers from "@/sections/Offers"
+import { useOffersDisplay } from "@/lib/firestoreSite"
 import Gallery from "@/sections/Gallery"
 import Locations from "@/sections/Locations"
 import Reservation from "@/sections/Reservation"
@@ -14,16 +15,23 @@ import Footer from "@/sections/Footer"
 
 export default function Home() {
   usePageMeta("/", PAGE_META.home)
+  // Where the offers go is chosen in Admin → Offers.
+  const { display, loading } = useOffersDisplay()
+  const offersAt = (slot: string) => !loading && display.placement === slot && <Offers />
+
   return (
     <>
       <Navbar />
       <Hero />
+      {offersAt("after-hero")}
       <InfoStrip />
       <MenuTeaser />
+      {offersAt("after-favourites")}
       <BiryaniHouse />
       <Story />
-      <Offers />
+      {offersAt("after-story")}
       <Gallery />
+      {offersAt("bottom")}
       <Locations />
       <Reservation />
       <Footer />

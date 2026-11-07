@@ -170,7 +170,7 @@ function menuSchema(items) {
     alternateName: NAME_AR,
     url: `${SITE}/`,
     telephone: PHONE,
-    servesCuisine: ["Indian", "Hyderabadi"],
+    servesCuisine: ["Indian", "Hyderabadi", "Chinese"],
     hasMenu: {
       "@type": "Menu",
       name: "Mairaj Restaurant Menu",

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { ArrowLeft, ArrowRight, LayoutGrid, Loader2, MoveHorizontal } from "lucide-react"
-import { useOffersDisplay, updateOffersDisplay, type OffersDisplay } from "@/lib/firestoreSite"
+import { useOffersDisplay, updateOffersDisplay, OFFER_PLACEMENTS, type OffersDisplay } from "@/lib/firestoreSite"
 import { PrimaryButton } from "@/components/admin/AdminUI"
 
 /** "How offers show on the homepage": cards, or a slowly sliding banner. */
@@ -21,7 +21,7 @@ export default function OffersDisplaySettings() {
     setSaving(true)
     try {
       await updateOffersDisplay(display)
-      toast.success(display.layout === "banner" ? "Offers now slide across the homepage" : "Offers now show as cards")
+      toast.success("Offers settings saved — the homepage is updated")
     } catch {
       toast.error("Couldn't save. Check your connection and try again.")
     } finally {
@@ -45,6 +45,18 @@ export default function OffersDisplaySettings() {
         </p>
       </div>
 
+      <div className="flex flex-col gap-1.5">
+        <span className="font-body text-xs font-semibold text-foreground/60">Place on the homepage</span>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {OFFER_PLACEMENTS.map((p) => (
+            <button key={p.id} type="button" onClick={() => set({ placement: p.id })} className={choice(display.placement === p.id)}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <span className="-mb-2 font-body text-xs font-semibold text-foreground/60">Style</span>
       <div className="flex gap-2">
         <button type="button" onClick={() => set({ layout: "cards" })} className={choice(display.layout === "cards")}>
           <LayoutGrid size={16} /> Cards

@@ -185,12 +185,22 @@ export interface OffersDisplay {
   /** Which way the banner moves across the screen. */
   direction: "to-left" | "to-right"
   speed: "slow" | "medium" | "fast"
+  /** Where on the homepage the offers appear. */
+  placement: "after-hero" | "after-favourites" | "after-story" | "bottom"
 }
+
+export const OFFER_PLACEMENTS: { id: OffersDisplay["placement"]; label: string }[] = [
+  { id: "after-hero", label: "Right below the top photo" },
+  { id: "after-favourites", label: "After favourite dishes" },
+  { id: "after-story", label: "After our story" },
+  { id: "bottom", label: "Near the bottom (before Find us)" },
+]
 
 export const DEFAULT_OFFERS_DISPLAY: OffersDisplay = {
   layout: "cards",
   direction: "to-left",
   speed: "slow",
+  placement: "after-story",
 }
 
 const offersDisplayRef = doc(db, "site", "offersDisplay")
@@ -215,4 +225,58 @@ export function useOffersDisplay() {
 
 export async function updateOffersDisplay(data: OffersDisplay) {
   await setDoc(offersDisplayRef, data)
+}
+
+// ── Background behind the title at the top of the Menu and About pages ──
+
+export type BannerPage = "menu" | "about"
+
+export interface BannerSettings {
+  /** plain = teal only; photo = a photo with a teal tint; watermark = faint picture */
+  mode: "plain" | "photo" | "watermark"
+  /** Photo or watermark picture URL. Empty watermark = Mairaj logo. */
+  image: string
+  /** Photo mode: how strong the teal tint is (0.35 – 0.9). */
+  tint: number
+  /** Watermark mode: how visible the picture is (0.05 – 0.4). */
+  strength: number
+  position: "left" | "center" | "right"
+}
+
+export const DEFAULT_BANNER: BannerSettings = {
+  mode: "plain",
+  image: "",
+  tint: 0.7,
+  strength: 0.15,
+  position: "right",
+}
+
+export type BannerSettingsMap = Record<BannerPage, BannerSettings>
+
+const bannersRef = doc(db, "site", "pageBanners")
+
+export function usePageBanners() {
+  const [banners, setBanners] = useState<BannerSettingsMap>({ menu: DEFAULT_BANNER, about: DEFAULT_BANNER })
+  const [loading, setLoading] = useState(true)
+  useEffect(
+    () =>
+      onSnapshot(
+        bannersRef,
+        (snap) => {
+          const data = (snap.data() ?? {}) as Partial<Record<BannerPage, Partial<BannerSettings>>>
+          setBanners({
+            menu: { ...DEFAULT_BANNER, ...data.menu },
+            about: { ...DEFAULT_BANNER, ...data.about },
+          })
+          setLoading(false)
+        },
+        () => setLoading(false)
+      ),
+    []
+  )
+  return { banners, loading }
+}
+
+export async function updatePageBanners(data: BannerSettingsMap) {
+  await setDoc(bannersRef, data)
 }
